@@ -42,7 +42,9 @@ export default function Home() {
 
   return (
     <main>
-      {!isStarted && <button onClick={startQuiz}>시작하기</button>}
+      {!isStarted && !isFinished && (
+        <button onClick={startQuiz}>시작하기</button>
+      )}
 
       {isStarted && currentQuestion && (
         <section>
@@ -53,7 +55,7 @@ export default function Home() {
           <h2>{currentQuestion.question}</h2>
 
           {currentQuestion.choices.map((choice, index) => (
-            <button onClick={() => selectChoice(index)}>
+            <button key={choice} onClick={() => selectChoice(index)}>
               {index + 1}. {choice}
             </button>
           ))}
