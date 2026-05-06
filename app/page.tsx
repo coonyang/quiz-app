@@ -9,9 +9,19 @@ export default function Home() {
   const [isStarted, setIsStarted] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
+  const [isAnswerChecked, setIsAnswerChecked] = useState(false);
+
+  const categories = ["전체", "수학", "개발용어"];
 
   const startQuiz = () => {
-    const shuffled = [...questions].sort(() => Math.random() - 0.5);
+    const filteredQuestions =
+      selectedCategory === "전체"
+        ? questions
+        : questions.filter((item) => item.category === selectedCategory);
+
+    const shuffled = [...filteredQuestions].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, 10);
 
     setQuizQuestions(selected);
@@ -24,50 +34,113 @@ export default function Home() {
   const currentQuestion = quizQuestions[currentIndex];
 
   const selectChoice = (choiceIndex: number) => {
+    if (isAnswerChecked) return;
+
     const answer = currentQuestion.answerIndex;
-    if (choiceIndex == answer) {
-      alert("정답입니다.");
+
+    setSelectedChoice(choiceIndex);
+    setIsAnswerChecked(true);
+
+    if (choiceIndex === answer) {
       setScore((prev) => prev + 1);
+    }
+
+    setTimeout(() => {
       if (currentIndex < quizQuestions.length - 1) {
         setCurrentIndex((prev) => prev + 1);
+        setSelectedChoice(null);
+        setIsAnswerChecked(false);
       } else {
-        alert("문제 끝!!");
         setIsStarted(false);
         setIsFinished(true);
+        setSelectedChoice(null);
+        setIsAnswerChecked(false);
       }
-    } else {
-      alert("땡!!");
-    }
+    }, 500);
   };
 
   return (
-    <main>
+    <main className="min-h-screen px-4 py-4 ">
       {!isStarted && !isFinished && (
-        <button onClick={startQuiz}>시작하기</button>
+        <section className="mx-auto flex max-w-xl flex-col gap-6">
+          <h1 className="mt-2 text-3xl font-bold">퀴즈 목록</h1>
+          <div className="rounded-lg border p-5">
+            <h2 className="mb-3 text-lg font-semibold">카테고리 선택</h2>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`rounded-md border px-4 py-2 ${
+                    selectedCategory === category
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>{" "}
+            <p className="mt-2">선택한 카테고리 : {selectedCategory}</p>
+          </div>
+
+          <button
+            className="rounded-md border px-5 py-3 hover:bg-emerald-300"
+            onClick={startQuiz}
+          >
+            시작하기
+          </button>
+        </section>
       )}
 
       {isStarted && currentQuestion && (
-        <section>
-          <p>
+        <section className="mx-auto flex max-w-xl flex-col gap-6">
+          <p className="text-sm">
             {currentIndex + 1} / {quizQuestions.length}
           </p>
+          <h2 className="text-2xl font-bold leading-relaxed">
+            {currentQuestion.question}
+          </h2>
+          <div className="grid gap-3">
+            {currentQuestion.choices.map((choice, index) => {
+              const isCorrect = index === currentQuestion.answerIndex;
+              const isSelected = selectedChoice === index;
 
-          <h2>{currentQuestion.question}</h2>
+              let choiceClass =
+                "rounded-lg border px-5 py-4 hover:bg-emerald-300";
 
-          {currentQuestion.choices.map((choice, index) => (
-            <button key={choice} onClick={() => selectChoice(index)}>
-              {index + 1}. {choice}
-            </button>
-          ))}
+              if (isAnswerChecked && isCorrect) {
+                choiceClass = "rounded-lg border px-5 py-4 bg-emerald-300";
+              }
+              if (isAnswerChecked && isSelected && !isCorrect) {
+                choiceClass = "rounded-lg border px-5 py-4 bg-red-300";
+              }
+              return (
+                <button
+                  className={choiceClass}
+                  key={choice}
+                  onClick={() => selectChoice(index)}
+                  disabled={isAnswerChecked}
+                >
+                  {choice}
+                </button>
+              );
+            })}
+          </div>{" "}
         </section>
       )}
       {isFinished && (
-        <section>
-          <h2>결과</h2>
-          <p>
+        <section className="mx-auto flex max-w-xl flex-col gap-6 text-center">
+          <h2 className="text-3xl font-bold">결과</h2>
+          <p className="text-lg">
             {quizQuestions.length}문제 중 {score}개 맞혔습니다.
           </p>
-          <button onClick={startQuiz}>다시 시작하기</button>
+          <button
+            className="rounded-md border px-5 py-3 font-semibold hover:bg-emerald-300"
+            onClick={startQuiz}
+          >
+            다시 시작하기
+          </button>
         </section>
       )}
     </main>
