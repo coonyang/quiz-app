@@ -1,3 +1,5 @@
+import type { RankingRecord } from "../types/quiz";
+
 type Question = {
   id: number;
   category: string;
@@ -14,6 +16,8 @@ type ResultScreen = {
   startTime: number | null;
   finishTime: number | null;
   correctCount: number;
+  rankings: RankingRecord[];
+  selectedCategory: string;
 };
 
 export default function ResultScreen({
@@ -24,9 +28,15 @@ export default function ResultScreen({
   startTime,
   finishTime,
   correctCount,
+  rankings,
+  selectedCategory,
 }: ResultScreen) {
   const elapsedSeconds =
     startTime && finishTime ? Math.floor((finishTime - startTime) / 1000) : 0;
+  const visibleRankings =
+    selectedCategory === "전체"
+      ? rankings
+      : rankings.filter((ranking) => ranking.category === selectedCategory);
 
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6 text-center">
@@ -59,6 +69,20 @@ export default function ResultScreen({
       >
         다시 시작하기
       </button>
+      <h3 className="text-2xl font-bold">랭킹</h3>
+
+      {visibleRankings.map((ranking, index) => (
+        <div key={ranking.id} className="rounded-lg border p-4 text-left">
+          <p>
+            {index + 1}. {ranking.nickname}
+          </p>
+          <p>점수: {ranking.score}점</p>
+          <p>
+            정답: {ranking.correctCount} / {ranking.totalQuestions}
+          </p>
+          <p>시간: {ranking.elapsedSeconds}초</p>
+        </div>
+      ))}
     </section>
   );
 }

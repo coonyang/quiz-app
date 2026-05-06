@@ -5,6 +5,7 @@ import ResultScreen from "./components/ResultScreen";
 import StartScreen from "./components/StartScreen";
 import { questions } from "./data/questions";
 import { useState, useEffect } from "react";
+import type { RankingRecord } from "./types/quiz";
 
 export default function Home() {
   const [quizQuestions, setQuizQuestions] = useState(questions);
@@ -22,6 +23,7 @@ export default function Home() {
   const [finishTime, setFinishTime] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(30);
   const TIME_LIMIT = 30;
+  const [rankings, setRankings] = useState<RankingRecord[]>([]);
 
   const categories = ["전체", "수학", "개발용어"];
 
@@ -46,6 +48,47 @@ export default function Home() {
 
     return () => clearTimeout(timerId);
   }, [isStarted, isAnswerChecked, timeLeft]);
+  useEffect(() => {
+    const savedRankings = localStorage.getItem("rankings");
+
+    if (savedRankings) {
+      setRankings(JSON.parse(savedRankings));
+    }
+  }, []);
+  useEffect(() => {
+    if (!isFinished || !finishTime || !startTime) return;
+
+    saveRanking(finishTime);
+  }, [isFinished]);
+
+  const saveRanking = (finishedAt: number) => {
+    if (!startTime) return;
+
+    const elapsedSeconds = Math.ceil((finishedAt - startTime) / 1000);
+
+    const newRecord: RankingRecord = {
+      id: crypto.randomUUID(),
+      nickname,
+      quizSetId: selectedCategory,
+      quizSetTitle: selectedCategory,
+      category: selectedCategory,
+      score,
+      correctCount,
+      totalQuestions: quizQuestions.length,
+      elapsedSeconds,
+      createdAt: new Date().toISOString(),
+    };
+
+    const nextRankings = [newRecord, ...rankings]
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.elapsedSeconds - b.elapsedSeconds;
+      })
+      .slice(0, 20);
+
+    setRankings(nextRankings);
+    localStorage.setItem("rankings", JSON.stringify(nextRankings));
+  };
 
   const startQuiz = () => {
     if (!nickname.trim()) return;
@@ -64,8 +107,6 @@ export default function Home() {
     setFinishTime(null);
     setTimeLeft(TIME_LIMIT);
     setCorrectCount(0);
-    setScore(0);
-
     setQuizQuestions(selected);
     setCurrentIndex(0);
     setIsStarted(true);
@@ -140,6 +181,8 @@ export default function Home() {
           startTime={startTime}
           finishTime={finishTime}
           correctCount={correctCount}
+          rankings={rankings}
+          selectedCategory={selectedCategory}
         />
       )}
     </main>
