@@ -11,6 +11,7 @@ export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isStarted, setIsStarted] = useState(false);
   const [score, setScore] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
@@ -19,6 +20,8 @@ export default function Home() {
   const [nickname, setNickname] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [finishTime, setFinishTime] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const TIME_LIMIT = 30;
 
   const categories = ["전체", "수학", "개발용어"];
 
@@ -29,6 +32,20 @@ export default function Home() {
       setNickname(savedNickname);
     }
   }, []);
+  useEffect(() => {
+    if (!isStarted || isAnswerChecked) return;
+
+    if (timeLeft <= 0) {
+      selectChoice(-1);
+      return;
+    }
+
+    const timerId = setTimeout(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timerId);
+  }, [isStarted, isAnswerChecked, timeLeft]);
 
   const startQuiz = () => {
     if (!nickname.trim()) return;
@@ -45,6 +62,9 @@ export default function Home() {
 
     setStartTime(Date.now());
     setFinishTime(null);
+    setTimeLeft(TIME_LIMIT);
+    setCorrectCount(0);
+    setScore(0);
 
     setQuizQuestions(selected);
     setCurrentIndex(0);
@@ -66,7 +86,8 @@ export default function Home() {
     setAnswers((prev) => [...prev, choiceIndex]);
 
     if (choiceIndex === answer) {
-      setScore((prev) => prev + 1);
+      setScore((prev) => prev + 100 + timeLeft);
+      setCorrectCount((prev) => prev + 1);
     }
 
     setTimeout(() => {
@@ -74,6 +95,7 @@ export default function Home() {
         setCurrentIndex((prev) => prev + 1);
         setSelectedChoice(null);
         setIsAnswerChecked(false);
+        setTimeLeft(TIME_LIMIT);
       } else {
         setFinishTime(Date.now());
 
@@ -106,6 +128,7 @@ export default function Home() {
           isAnswerChecked={isAnswerChecked}
           selectedChoice={selectedChoice}
           onSelectChoice={selectChoice}
+          timeLeft={timeLeft}
         />
       )}
       {isFinished && (
@@ -116,6 +139,7 @@ export default function Home() {
           startQuiz={startQuiz}
           startTime={startTime}
           finishTime={finishTime}
+          correctCount={correctCount}
         />
       )}
     </main>

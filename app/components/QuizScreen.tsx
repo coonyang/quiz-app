@@ -13,6 +13,7 @@ type QuizScreenProps = {
   isAnswerChecked: boolean;
   selectedChoice: number | null;
   onSelectChoice: (choiceIndex: number) => void;
+  timeLeft: number;
 };
 
 export default function QuizScreen({
@@ -22,12 +23,14 @@ export default function QuizScreen({
   isAnswerChecked,
   selectedChoice,
   onSelectChoice,
+  timeLeft,
 }: QuizScreenProps) {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6">
       <p className="text-sm">
         {currentIndex + 1} / {quizQuestions.length}
       </p>
+      <p className="text-sm">남은 시간: {timeLeft}초</p>
       <h2 className="text-2xl font-bold leading-relaxed">
         {currentQuestion.question}
       </h2>
