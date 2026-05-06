@@ -4,7 +4,7 @@ import QuizScreen from "./components/QuizScreen";
 import ResultScreen from "./components/ResultScreen";
 import StartScreen from "./components/StartScreen";
 import { questions } from "./data/questions";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [quizQuestions, setQuizQuestions] = useState(questions);
@@ -16,10 +16,25 @@ export default function Home() {
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
   const [answers, setAnswers] = useState<number[]>([]);
+  const [nickname, setNickname] = useState("");
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [finishTime, setFinishTime] = useState<number | null>(null);
 
   const categories = ["전체", "수학", "개발용어"];
 
+  useEffect(() => {
+    const savedNickname = localStorage.getItem("nickname");
+
+    if (savedNickname) {
+      setNickname(savedNickname);
+    }
+  }, []);
+
   const startQuiz = () => {
+    if (!nickname.trim()) return;
+
+    localStorage.setItem("nickname", nickname.trim());
+
     const filteredQuestions =
       selectedCategory === "전체"
         ? questions
@@ -27,6 +42,9 @@ export default function Home() {
 
     const shuffled = [...filteredQuestions].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, 10);
+
+    setStartTime(Date.now());
+    setFinishTime(null);
 
     setQuizQuestions(selected);
     setCurrentIndex(0);
@@ -57,12 +75,14 @@ export default function Home() {
         setSelectedChoice(null);
         setIsAnswerChecked(false);
       } else {
+        setFinishTime(Date.now());
+
         setIsStarted(false);
         setIsFinished(true);
         setSelectedChoice(null);
         setIsAnswerChecked(false);
       }
-    }, 500);
+    }, 300);
   };
 
   return (
@@ -73,6 +93,8 @@ export default function Home() {
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
           onStartQuiz={startQuiz}
+          nickname={nickname}
+          onChangeNickname={setNickname}
         />
       )}
 
@@ -92,6 +114,8 @@ export default function Home() {
           score={score}
           answers={answers}
           startQuiz={startQuiz}
+          startTime={startTime}
+          finishTime={finishTime}
         />
       )}
     </main>

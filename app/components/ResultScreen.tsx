@@ -11,6 +11,8 @@ type ResultScreen = {
   answers: number[];
   score: number;
   startQuiz: () => void;
+  startTime: number | null;
+  finishTime: number | null;
 };
 
 export default function ResultScreen({
@@ -18,13 +20,20 @@ export default function ResultScreen({
   answers,
   score,
   startQuiz,
+  startTime,
+  finishTime,
 }: ResultScreen) {
+  const elapsedSeconds =
+    startTime && finishTime ? Math.floor((finishTime - startTime) / 1000) : 0;
+
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6 text-center">
       <h2 className="text-3xl font-bold">결과</h2>
       <p className="text-lg">
         {quizQuestions.length}문제 중 {score}개 맞혔습니다.
       </p>
+      <p className="text-lg">걸린 시간: {elapsedSeconds}초</p>
+
       {quizQuestions.map((question, index) => {
         const userAnswer = answers[index];
         const isCorrect = userAnswer === question.answerIndex;
