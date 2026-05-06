@@ -1,23 +1,15 @@
-import type { RankingRecord } from "../types/quiz";
+import type { Question, RankingRecord } from "../types/quiz";
 
-type Question = {
-  id: number;
-  category: string;
-  question: string;
-  choices: string[];
-  answerIndex: number;
-};
-
-type ResultScreen = {
+type ResultScreenProps = {
   quizQuestions: Question[];
-  answers: number[];
   score: number;
+  answers: number[];
   startQuiz: () => void;
   startTime: number | null;
   finishTime: number | null;
   correctCount: number;
   rankings: RankingRecord[];
-  selectedCategory: string;
+  selectedQuizSetId: string;
 };
 
 export default function ResultScreen({
@@ -29,14 +21,13 @@ export default function ResultScreen({
   finishTime,
   correctCount,
   rankings,
-  selectedCategory,
-}: ResultScreen) {
+  selectedQuizSetId,
+}: ResultScreenProps) {
   const elapsedSeconds =
     startTime && finishTime ? Math.floor((finishTime - startTime) / 1000) : 0;
-  const visibleRankings =
-    selectedCategory === "전체"
-      ? rankings
-      : rankings.filter((ranking) => ranking.category === selectedCategory);
+  const visibleRankings = rankings.filter(
+    (ranking) => ranking.quizSetId === selectedQuizSetId,
+  );
 
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6 text-center">
@@ -83,6 +74,9 @@ export default function ResultScreen({
           <p>시간: {ranking.elapsedSeconds}초</p>
         </div>
       ))}
+      {visibleRankings.length === 0 && (
+        <p className="text-sm text-gray-500">아직 랭킹이 없습니다.</p>
+      )}
     </section>
   );
 }

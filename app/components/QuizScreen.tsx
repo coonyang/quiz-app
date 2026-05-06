@@ -1,10 +1,4 @@
-type Question = {
-  id: number;
-  category: string;
-  question: string;
-  choices: string[];
-  answerIndex: number;
-};
+import type { Question } from "../types/quiz";
 
 type QuizScreenProps = {
   currentIndex: number;

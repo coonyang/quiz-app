@@ -10,3 +10,18 @@ export type RankingRecord = {
   elapsedSeconds: number;
   createdAt: string;
 };
+
+export type Question = {
+  id: number;
+  question: string;
+  choices: string[];
+  answerIndex: number;
+};
+
+export type QuizSet = {
+  id: string;
+  title: string;
+  category: string;
+  author: string;
+  questions: Question[];
+};

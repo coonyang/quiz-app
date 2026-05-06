@@ -3,18 +3,19 @@
 import QuizScreen from "./components/QuizScreen";
 import ResultScreen from "./components/ResultScreen";
 import StartScreen from "./components/StartScreen";
-import { questions } from "./data/questions";
+import { quizSets } from "./data/quizSets";
 import { useState, useEffect } from "react";
-import type { RankingRecord } from "./types/quiz";
+import type { RankingRecord, Question, QuizSet } from "./types/quiz";
 
 export default function Home() {
-  const [quizQuestions, setQuizQuestions] = useState(questions);
+  const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isStarted, setIsStarted] = useState(false);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedQuizSetId, setSelectedQuizSetId] = useState("");
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -25,7 +26,10 @@ export default function Home() {
   const TIME_LIMIT = 30;
   const [rankings, setRankings] = useState<RankingRecord[]>([]);
 
-  const categories = ["전체", "수학", "개발용어"];
+  const categories = [
+    "전체",
+    ...new Set(quizSets.map((item) => item.category)),
+  ];
 
   useEffect(() => {
     const savedNickname = localStorage.getItem("nickname");
@@ -59,48 +63,31 @@ export default function Home() {
     if (!isFinished || !finishTime || !startTime) return;
 
     saveRanking(finishTime);
-  }, [isFinished]);
+  }, [isFinished, finishTime]);
 
-  const saveRanking = (finishedAt: number) => {
-    if (!startTime) return;
-
-    const elapsedSeconds = Math.ceil((finishedAt - startTime) / 1000);
-
-    const newRecord: RankingRecord = {
-      id: crypto.randomUUID(),
-      nickname,
-      quizSetId: selectedCategory,
-      quizSetTitle: selectedCategory,
-      category: selectedCategory,
-      score,
-      correctCount,
-      totalQuestions: quizQuestions.length,
-      elapsedSeconds,
-      createdAt: new Date().toISOString(),
-    };
-
-    const nextRankings = [newRecord, ...rankings]
-      .sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return a.elapsedSeconds - b.elapsedSeconds;
-      })
-      .slice(0, 20);
-
-    setRankings(nextRankings);
-    localStorage.setItem("rankings", JSON.stringify(nextRankings));
+  const visibleQuizSets =
+    selectedCategory === "전체" || selectedCategory === ""
+      ? quizSets
+      : quizSets.filter((item) => item.category === selectedCategory);
+  const handleSelectCategory = (category: string) => {
+    setSelectedCategory(category);
+    setSelectedQuizSetId("");
   };
 
   const startQuiz = () => {
     if (!nickname.trim()) return;
 
+    const selectedQuizSet = quizSets.find(
+      (quizSet) => quizSet.id === selectedQuizSetId,
+    );
+
+    if (!selectedQuizSet) return;
+
     localStorage.setItem("nickname", nickname.trim());
 
-    const filteredQuestions =
-      selectedCategory === "전체"
-        ? questions
-        : questions.filter((item) => item.category === selectedCategory);
-
-    const shuffled = [...filteredQuestions].sort(() => Math.random() - 0.5);
+    const shuffled = [...selectedQuizSet.questions].sort(
+      () => Math.random() - 0.5,
+    );
     const selected = shuffled.slice(0, 10);
 
     setStartTime(Date.now());
@@ -147,6 +134,40 @@ export default function Home() {
       }
     }, 300);
   };
+  const saveRanking = (finishedAt: number) => {
+    if (!startTime) return;
+
+    const selectedQuizSet = quizSets.find(
+      (quizSet) => quizSet.id === selectedQuizSetId,
+    );
+
+    if (!selectedQuizSet) return;
+
+    const elapsedSeconds = Math.ceil((finishedAt - startTime) / 1000);
+
+    const newRecord: RankingRecord = {
+      id: crypto.randomUUID(),
+      nickname,
+      quizSetId: selectedQuizSet.id,
+      quizSetTitle: selectedQuizSet.title,
+      category: selectedQuizSet.category,
+      score,
+      correctCount,
+      totalQuestions: quizQuestions.length,
+      elapsedSeconds,
+      createdAt: new Date().toISOString(),
+    };
+
+    const nextRankings = [newRecord, ...rankings]
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.elapsedSeconds - b.elapsedSeconds;
+      })
+      .slice(0, 20);
+
+    setRankings(nextRankings);
+    localStorage.setItem("rankings", JSON.stringify(nextRankings));
+  };
 
   return (
     <main className="min-h-screen px-4 py-4 ">
@@ -154,7 +175,10 @@ export default function Home() {
         <StartScreen
           categories={categories}
           selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
+          onSelectCategory={handleSelectCategory}
+          quizSets={visibleQuizSets}
+          selectedQuizSetId={selectedQuizSetId}
+          onSelectQuizSet={setSelectedQuizSetId}
           onStartQuiz={startQuiz}
           nickname={nickname}
           onChangeNickname={setNickname}
@@ -182,7 +206,7 @@ export default function Home() {
           finishTime={finishTime}
           correctCount={correctCount}
           rankings={rankings}
-          selectedCategory={selectedCategory}
+          selectedQuizSetId={selectedQuizSetId}
         />
       )}
     </main>
