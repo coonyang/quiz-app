@@ -12,6 +12,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
+  const [answers, setAnswers] = useState<number[]>([]);
 
   const categories = ["전체", "수학", "개발용어"];
 
@@ -29,6 +30,7 @@ export default function Home() {
     setIsStarted(true);
     setScore(0);
     setIsFinished(false);
+    setAnswers([]);
   };
 
   const currentQuestion = quizQuestions[currentIndex];
@@ -40,6 +42,7 @@ export default function Home() {
 
     setSelectedChoice(choiceIndex);
     setIsAnswerChecked(true);
+    setAnswers((prev) => [...prev, choiceIndex]);
 
     if (choiceIndex === answer) {
       setScore((prev) => prev + 1);
@@ -135,6 +138,28 @@ export default function Home() {
           <p className="text-lg">
             {quizQuestions.length}문제 중 {score}개 맞혔습니다.
           </p>
+          {quizQuestions.map((question, index) => {
+            const userAnswer = answers[index];
+            const isCorrect = userAnswer === question.answerIndex;
+            return (
+              <div
+                key={question.id}
+                className="rounded-lg border p-4 text-left"
+              >
+                <div className="flex justify-between">
+                  <p className="font-semibold">{question.question} </p>
+
+                  <p
+                    className={isCorrect ? "text-emerald-600" : "text-red-600"}
+                  >
+                    {isCorrect ? "정답" : "오답"}
+                  </p>
+                </div>
+                <p>선택: {question.choices[userAnswer]}</p>
+                <p>정답: {question.choices[question.answerIndex]}</p>
+              </div>
+            );
+          })}
           <button
             className="rounded-md border px-5 py-3 font-semibold hover:bg-emerald-300"
             onClick={startQuiz}
