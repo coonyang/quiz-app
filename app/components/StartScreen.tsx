@@ -36,6 +36,28 @@ export default function StartScreen({
         <h2 className="mb-3 text-lg font-semibold">문제집 선택</h2>
 
         <div className="grid gap-2">
+          <div className="rounded-lg border p-5">
+            <h2 className="mb-3 font-semibold">카테고리 선택</h2>
+
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => onSelectCategory(category)}
+                  className={`rounded-md border px-4 py-2 ${
+                    selectedCategory === category
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+
+            <p className="mt-2 text-sm">선택한 카테고리: {selectedCategory}</p>
+          </div>
+
           {quizSets.map((quizSet) => (
             <button
               key={quizSet.id}
