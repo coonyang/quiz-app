@@ -10,6 +10,8 @@ type StartScreenProps = {
   onStartQuiz: () => void;
   nickname: string;
   onChangeNickname: (nickname: string) => void;
+  customQuizSets: QuizSet[];
+  onDeleteQuizSet: (quizSetId: string) => void;
 };
 export default function StartScreen({
   categories,
@@ -21,6 +23,8 @@ export default function StartScreen({
   onStartQuiz,
   nickname,
   onChangeNickname,
+  customQuizSets,
+  onDeleteQuizSet,
 }: StartScreenProps) {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6">
@@ -58,22 +62,43 @@ export default function StartScreen({
             <p className="mt-2 text-sm">선택한 카테고리: {selectedCategory}</p>
           </div>
 
-          {quizSets.map((quizSet) => (
-            <button
-              key={quizSet.id}
-              onClick={() => onSelectQuizSet(quizSet.id)}
-              className={`rounded-md border px-4 py-3 text-left ${
-                selectedQuizSetId === quizSet.id
-                  ? "bg-black text-white"
-                  : "bg-white text-black"
-              }`}
-            >
-              <p className="font-semibold">{quizSet.title}</p>
-              <p className="text-sm">
-                {quizSet.category} · {quizSet.author}
-              </p>
-            </button>
-          ))}
+          {quizSets.map((quizSet) => {
+            const isCustomQuizSet = customQuizSets.some(
+              (customQuizSet) => customQuizSet.id === quizSet.id,
+            );
+
+            const canDeleteQuizSet =
+              isCustomQuizSet && quizSet.author === nickname.trim();
+            return (
+              <div
+                key={quizSet.id}
+                className={`flex rounded-md border px-4 py-3 text-left ${
+                  selectedQuizSetId === quizSet.id
+                    ? "bg-black text-white"
+                    : "bg-white text-black"
+                }`}
+              >
+                <button
+                  className="w-full text-left"
+                  onClick={() => onSelectQuizSet(quizSet.id)}
+                >
+                  <p className="font-semibold">{quizSet.title}</p>
+                  <p className="text-sm">
+                    {quizSet.category} · {quizSet.author}
+                  </p>
+                </button>
+                {canDeleteQuizSet && (
+                  <button
+                    type="button"
+                    onClick={() => onDeleteQuizSet(quizSet.id)}
+                    className="whitespace-nowrap rounded-md border px-5 py-1 text-sm hover:bg-red-100"
+                  >
+                    삭제
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

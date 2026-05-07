@@ -224,6 +224,8 @@ export default function Home() {
             onStartQuiz={startQuiz}
             nickname={nickname}
             onChangeNickname={setNickname}
+            customQuizSets={customQuizSets}
+            onDeleteQuizSet={deleteCustomQuizSet}
           />
           <button
             className="mx-auto mt-4 block max-w-xl rounded-md border px-5 py-3 hover:bg-emerald-300"
@@ -238,7 +240,6 @@ export default function Home() {
               onClose={() => setIsCreateModalOpen(false)}
               categories={categories.filter((category) => category !== "전체")}
               onCreateQuizSet={createQuizSet}
-              // onDeleteCustomQuizSet={deleteCustomQuizSet}
             />
           )}
         </>
