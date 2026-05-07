@@ -1,5 +1,6 @@
 "use client";
 
+import CreateQuizSetModal from "./components/CreateQuizSetModal";
 import QuizScreen from "./components/QuizScreen";
 import ResultScreen from "./components/ResultScreen";
 import StartScreen from "./components/StartScreen";
@@ -25,11 +26,22 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState(30);
   const TIME_LIMIT = 30;
   const [rankings, setRankings] = useState<RankingRecord[]>([]);
+  const [customQuizSets, setCustomQuizSets] = useState<QuizSet[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  const allQuizSets = [...quizSets, ...customQuizSets];
   const categories = [
     "전체",
-    ...new Set(quizSets.map((item) => item.category)),
+    ...new Set(allQuizSets.map((item) => item.category)),
   ];
+
+  useEffect(() => {
+    const savedCustomQuizSets = localStorage.getItem("customQuizSets");
+
+    if (savedCustomQuizSets) {
+      setCustomQuizSets(JSON.parse(savedCustomQuizSets));
+    }
+  }, []);
 
   useEffect(() => {
     const savedNickname = localStorage.getItem("nickname");
@@ -38,6 +50,7 @@ export default function Home() {
       setNickname(savedNickname);
     }
   }, []);
+
   useEffect(() => {
     if (!isStarted || isAnswerChecked) return;
 
@@ -52,6 +65,7 @@ export default function Home() {
 
     return () => clearTimeout(timerId);
   }, [isStarted, isAnswerChecked, timeLeft]);
+
   useEffect(() => {
     const savedRankings = localStorage.getItem("rankings");
 
@@ -59,6 +73,7 @@ export default function Home() {
       setRankings(JSON.parse(savedRankings));
     }
   }, []);
+
   useEffect(() => {
     if (!isFinished || !finishTime || !startTime) return;
 
@@ -67,17 +82,42 @@ export default function Home() {
 
   const visibleQuizSets =
     selectedCategory === "전체" || selectedCategory === ""
-      ? quizSets
-      : quizSets.filter((item) => item.category === selectedCategory);
+      ? allQuizSets
+      : allQuizSets.filter((item) => item.category === selectedCategory);
+
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
     setSelectedQuizSetId("");
   };
 
+  const createQuizSet = (newQuizSet: QuizSet) => {
+    const nextCustomQuizSets = [...customQuizSets, newQuizSet];
+
+    setCustomQuizSets(nextCustomQuizSets);
+    localStorage.setItem("customQuizSets", JSON.stringify(nextCustomQuizSets));
+
+    setSelectedCategory(newQuizSet.category);
+    setSelectedQuizSetId(newQuizSet.id);
+    setIsCreateModalOpen(false);
+  };
+
+  const deleteCustomQuizSet = (quizSetId: string) => {
+    const nextCustomQuizSets = customQuizSets.filter(
+      (quizSet) => quizSet.id !== quizSetId,
+    );
+
+    setCustomQuizSets(nextCustomQuizSets);
+    localStorage.setItem("customQuizSets", JSON.stringify(nextCustomQuizSets));
+
+    if (selectedQuizSetId === quizSetId) {
+      setSelectedQuizSetId("");
+    }
+  };
+
   const startQuiz = () => {
     if (!nickname.trim()) return;
 
-    const selectedQuizSet = quizSets.find(
+    const selectedQuizSet = allQuizSets.find(
       (quizSet) => quizSet.id === selectedQuizSetId,
     );
 
@@ -134,10 +174,11 @@ export default function Home() {
       }
     }, 300);
   };
+
   const saveRanking = (finishedAt: number) => {
     if (!startTime) return;
 
-    const selectedQuizSet = quizSets.find(
+    const selectedQuizSet = allQuizSets.find(
       (quizSet) => quizSet.id === selectedQuizSetId,
     );
 
@@ -172,17 +213,35 @@ export default function Home() {
   return (
     <main className="min-h-screen px-4 py-4 ">
       {!isStarted && !isFinished && (
-        <StartScreen
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={handleSelectCategory}
-          quizSets={visibleQuizSets}
-          selectedQuizSetId={selectedQuizSetId}
-          onSelectQuizSet={setSelectedQuizSetId}
-          onStartQuiz={startQuiz}
-          nickname={nickname}
-          onChangeNickname={setNickname}
-        />
+        <>
+          <StartScreen
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleSelectCategory}
+            quizSets={visibleQuizSets}
+            selectedQuizSetId={selectedQuizSetId}
+            onSelectQuizSet={setSelectedQuizSetId}
+            onStartQuiz={startQuiz}
+            nickname={nickname}
+            onChangeNickname={setNickname}
+          />
+          <button
+            className="mx-auto mt-4 block max-w-xl rounded-md border px-5 py-3 hover:bg-emerald-300"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            문제집 만들기
+          </button>
+
+          {isCreateModalOpen && (
+            <CreateQuizSetModal
+              nickname={nickname}
+              onClose={() => setIsCreateModalOpen(false)}
+              categories={categories.filter((category) => category !== "전체")}
+              onCreateQuizSet={createQuizSet}
+              // onDeleteCustomQuizSet={deleteCustomQuizSet}
+            />
+          )}
+        </>
       )}
 
       {isStarted && currentQuestion && (
