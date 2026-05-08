@@ -96,7 +96,7 @@ export default function StartScreen({
                       onClick={() => onEditQuizSet(quizSet)}
                       className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-gray-100"
                     >
-                      문제 추가
+                      수정
                     </button>
 
                     <button

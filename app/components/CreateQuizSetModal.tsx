@@ -28,6 +28,8 @@ export default function CreateQuizSetModal({
   const [questionText, setQuestionText] = useState("");
   const [choices, setChoices] = useState(["", "", "", ""]);
   const [answerIndex, setAnswerIndex] = useState(0);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const previewQuestion = questions[previewIndex];
 
   const addQuestion = () => {
     if (!questionText.trim()) return;
@@ -64,6 +66,21 @@ export default function CreateQuizSetModal({
     } else {
       onCreateQuizSet(quizSet);
     }
+  };
+
+  const deleteQuestion = (questionId: number) => {
+    setQuestions((prev) => {
+      const nextQuestions = prev.filter(
+        (question) => question.id !== questionId,
+      );
+
+      setPreviewIndex((currentIndex) => {
+        if (nextQuestions.length === 0) return 0;
+        return Math.min(currentIndex, nextQuestions.length - 1);
+      });
+
+      return nextQuestions;
+    });
   };
 
   return (
@@ -148,6 +165,66 @@ export default function CreateQuizSetModal({
           </div>
 
           <p className="text-sm">추가된 문제: {questions.length}개</p>
+          {previewQuestion && (
+            <div className="rounded-md border p-3 text-left">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="font-semibold">
+                  {previewIndex + 1} / {questions.length}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => deleteQuestion(previewQuestion.id)}
+                  className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-red-100"
+                >
+                  삭제
+                </button>
+              </div>
+
+              <p className="font-semibold">{previewQuestion.question}</p>
+
+              <ul className="mt-2 grid gap-1 text-sm">
+                {previewQuestion.choices.map((choice, choiceIndex) => (
+                  <li
+                    key={`${choice}-${choiceIndex}`}
+                    className={
+                      choiceIndex === previewQuestion.answerIndex
+                        ? "font-semibold text-emerald-600"
+                        : ""
+                    }
+                  >
+                    {choiceIndex + 1}. {choice}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-3 flex justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPreviewIndex((prev) => Math.max(0, prev - 1))
+                  }
+                  disabled={previewIndex === 0}
+                  className="rounded-md border px-3 py-1 text-sm disabled:opacity-40"
+                >
+                  이전
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPreviewIndex((prev) =>
+                      Math.min(questions.length - 1, prev + 1),
+                    )
+                  }
+                  disabled={previewIndex === questions.length - 1}
+                  className="rounded-md border px-3 py-1 text-sm disabled:opacity-40"
+                >
+                  다음
+                </button>
+              </div>
+            </div>
+          )}
 
           <button
             className="rounded-md bg-black px-5 py-3 font-semibold text-white disabled:opacity-40"
