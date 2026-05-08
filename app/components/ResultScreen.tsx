@@ -10,6 +10,7 @@ type ResultScreenProps = {
   correctCount: number;
   rankings: RankingRecord[];
   selectedQuizSetId: string;
+  onGoHome: () => void;
 };
 
 export default function ResultScreen({
@@ -22,6 +23,7 @@ export default function ResultScreen({
   correctCount,
   rankings,
   selectedQuizSetId,
+  onGoHome,
 }: ResultScreenProps) {
   const elapsedSeconds =
     startTime && finishTime ? Math.floor((finishTime - startTime) / 1000) : 0;
@@ -59,6 +61,12 @@ export default function ResultScreen({
         onClick={startQuiz}
       >
         다시 시작하기
+      </button>
+      <button
+        className="rounded-md border px-5 py-3 font-semibold hover:bg-emerald-300"
+        onClick={onGoHome}
+      >
+        홈으로 돌아가기
       </button>
       <h3 className="text-2xl font-bold">랭킹</h3>
 

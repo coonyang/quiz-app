@@ -222,6 +222,21 @@ export default function Home() {
     setEditingQuizSet(null);
   };
 
+  const goHome = () => {
+    setIsStarted(false);
+    setIsFinished(false);
+    setQuizQuestions([]);
+    setCurrentIndex(0);
+    setSelectedChoice(null);
+    setIsAnswerChecked(false);
+    setAnswers([]);
+    setScore(0);
+    setCorrectCount(0);
+    setStartTime(null);
+    setFinishTime(null);
+    setTimeLeft(TIME_LIMIT);
+  };
+
   return (
     <main className="min-h-screen px-4 py-4 ">
       {!isStarted && !isFinished && (
@@ -285,6 +300,7 @@ export default function Home() {
           correctCount={correctCount}
           rankings={rankings}
           selectedQuizSetId={selectedQuizSetId}
+          onGoHome={goHome}
         />
       )}
     </main>
