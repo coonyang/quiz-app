@@ -1,7 +1,16 @@
+"use client";
+
+import { useState } from "react";
+
 type RoomScreenProps = {
   roomId: string;
   nickname: string;
   onLeaveRoom: () => void;
+};
+type ChatMessage = {
+  id: string;
+  nickname: string;
+  message: string;
 };
 
 const mockPlayers = [
@@ -9,7 +18,7 @@ const mockPlayers = [
   { id: "player-2", nickname: "게스트", score: 0, isHost: false },
 ];
 
-const mockMessages = [
+const initialMessages: ChatMessage[] = [
   { id: "message-1", nickname: "관리자", message: "시작할까요?" },
   { id: "message-2", nickname: "게스트", message: "ㄱㄱ" },
 ];
@@ -19,6 +28,21 @@ export default function RoomScreen({
   nickname,
   onLeaveRoom,
 }: RoomScreenProps) {
+  const [messages, setMessages] = useState(initialMessages);
+  const [messageText, setMessageText] = useState("");
+  const sendMessage = () => {
+    if (!messageText.trim()) return;
+
+    const newMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      nickname: nickname.trim() || "익명",
+      message: messageText,
+    };
+
+    setMessages((prev) => [...prev, newMessage]);
+    setMessageText("");
+  };
+
   return (
     <section className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex flex-col gap-4">
@@ -79,7 +103,7 @@ export default function RoomScreen({
         <h2 className="mb-3 text-lg font-semibold">채팅</h2>
 
         <div className="flex-1 space-y-3 overflow-y-auto rounded-md border p-3">
-          {mockMessages.map((message) => (
+          {messages.map((message) => (
             <div key={message.id}>
               <p className="text-sm font-semibold">{message.nickname}</p>
               <p className="text-sm">{message.message}</p>
@@ -89,10 +113,21 @@ export default function RoomScreen({
 
         <div className="mt-3 flex gap-2">
           <input
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                sendMessage();
+              }
+            }}
             placeholder="메시지 입력"
             className="min-w-0 flex-1 rounded-md border px-3 py-2"
           />
-          <button className="rounded-md border px-3 py-2 hover:bg-gray-100">
+
+          <button
+            onClick={sendMessage}
+            className="rounded-md border px-3 py-2 hover:bg-gray-100"
+          >
             전송
           </button>
         </div>
