@@ -7,6 +7,7 @@ import StartScreen from "../components/StartScreen";
 import { quizSets } from "../data/quizSets";
 import { useState, useEffect } from "react";
 import type { RankingRecord, Question, QuizSet } from "../types/quiz";
+import RoomLobby from "./RoomLobby";
 
 export default function HomeClient() {
   const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
@@ -29,6 +30,7 @@ export default function HomeClient() {
   const [customQuizSets, setCustomQuizSets] = useState<QuizSet[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingQuizSet, setEditingQuizSet] = useState<QuizSet | null>(null);
+  const [playMode, setPlayMode] = useState<"solo" | "online">("solo");
 
   const allQuizSets = [...quizSets, ...customQuizSets];
   const categories = [
@@ -241,40 +243,66 @@ export default function HomeClient() {
     <main className="min-h-screen px-4 py-4 ">
       {!isStarted && !isFinished && (
         <>
-          <StartScreen
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={handleSelectCategory}
-            quizSets={visibleQuizSets}
-            selectedQuizSetId={selectedQuizSetId}
-            onSelectQuizSet={setSelectedQuizSetId}
-            onStartQuiz={startQuiz}
-            nickname={nickname}
-            onChangeNickname={setNickname}
-            customQuizSets={customQuizSets}
-            onDeleteQuizSet={deleteCustomQuizSet}
-            onEditQuizSet={setEditingQuizSet}
-          />
-          <button
-            className="mx-auto mt-4 block max-w-xl rounded-md border px-5 py-3 hover:bg-emerald-300"
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            문제집 만들기
-          </button>
+          <div className="ma-auto mb-4 flex max-w-xl gap-2">
+            <button
+              onClick={() => setPlayMode("solo")}
+              className={`flex-1 rounded-md border px-4 py-2 ${playMode === "solo" ? "bg-black text-white" : "bg-white text-black"}`}
+            >
+              혼자 풀기
+            </button>
+            <button
+              onClick={() => setPlayMode("online")}
+              className={`flex-1 rounded-md border px-4 py-2 ${
+                playMode === "online"
+                  ? "bg-black text-white"
+                  : "bg-white text-black"
+              }`}
+            >
+              온라인 방
+            </button>
+          </div>
+          {playMode === "solo" && (
+            <>
+              <StartScreen
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={handleSelectCategory}
+                quizSets={visibleQuizSets}
+                selectedQuizSetId={selectedQuizSetId}
+                onSelectQuizSet={setSelectedQuizSetId}
+                onStartQuiz={startQuiz}
+                nickname={nickname}
+                onChangeNickname={setNickname}
+                customQuizSets={customQuizSets}
+                onDeleteQuizSet={deleteCustomQuizSet}
+                onEditQuizSet={setEditingQuizSet}
+              />
+              <button
+                className="mx-auto mt-4 block max-w-xl rounded-md border px-5 py-3 hover:bg-emerald-300"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                문제집 만들기
+              </button>
 
-          {(isCreateModalOpen || editingQuizSet) && (
-            <CreateQuizSetModal
-              nickname={nickname}
-              editingQuizSet={editingQuizSet}
-              onClose={() => {
-                setIsCreateModalOpen(false);
-                setEditingQuizSet(null);
-              }}
-              categories={categories.filter((category) => category !== "전체")}
-              onCreateQuizSet={createQuizSet}
-              onUpdateQuizSet={updateQuizSet}
-            />
+              {(isCreateModalOpen || editingQuizSet) && (
+                <CreateQuizSetModal
+                  nickname={nickname}
+                  editingQuizSet={editingQuizSet}
+                  onClose={() => {
+                    setIsCreateModalOpen(false);
+                    setEditingQuizSet(null);
+                  }}
+                  categories={categories.filter(
+                    (category) => category !== "전체",
+                  )}
+                  onCreateQuizSet={createQuizSet}
+                  onUpdateQuizSet={updateQuizSet}
+                />
+              )}
+            </>
           )}
+
+          {playMode === "online" && <RoomLobby />}
         </>
       )}
 
