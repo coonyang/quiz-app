@@ -280,13 +280,8 @@ export default function HomeClient() {
                     customQuizSets={customQuizSets}
                     onDeleteQuizSet={deleteCustomQuizSet}
                     onEditQuizSet={setEditingQuizSet}
+                    onOpenCreateModal={() => setIsCreateModalOpen(true)}
                   />
-                  <button
-                    className="mx-auto w-full mt-4 block max-w-xl rounded-md border px-5 py-3 hover:bg-emerald-300"
-                    onClick={() => setIsCreateModalOpen(true)}
-                  >
-                    문제집 만들기
-                  </button>
 
                   {(isCreateModalOpen || editingQuizSet) && (
                     <CreateQuizSetModal

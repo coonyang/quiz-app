@@ -13,6 +13,7 @@ type StartScreenProps = {
   customQuizSets: QuizSet[];
   onDeleteQuizSet: (quizSetId: string) => void;
   onEditQuizSet: (quizSet: QuizSet) => void;
+  onOpenCreateModal: () => void;
 };
 export default function StartScreen({
   categories,
@@ -27,6 +28,7 @@ export default function StartScreen({
   customQuizSets,
   onDeleteQuizSet,
   onEditQuizSet,
+  onOpenCreateModal,
 }: StartScreenProps) {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6">
@@ -39,8 +41,16 @@ export default function StartScreen({
       <h1 className="mt-2 text-3xl font-bold">퀴즈 목록</h1>
 
       <div className="rounded-lg border p-5">
-        <h2 className="mb-3 text-lg font-semibold">문제집 선택</h2>
-
+        <div className="mb-3 flex items-center justify-between gap-3 ">
+          <h2 className="mb-3 text-lg font-semibold">문제집 선택</h2>
+          <button
+            type="button"
+            onClick={onOpenCreateModal}
+            className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-emerald-300"
+          >
+            문제집 만들기
+          </button>
+        </div>
         <div className="grid gap-2">
           <div className="rounded-lg border p-5">
             <h2 className="mb-3 font-semibold">카테고리 선택</h2>
