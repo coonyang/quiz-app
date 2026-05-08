@@ -5,7 +5,9 @@ type Room = {
   currentPlayers: number;
   maxPlayers: number;
 };
-
+type RoomLobbyProps = {
+  onEnterRoom: (roomId: string) => void;
+};
 const mockRooms: Room[] = [
   {
     id: "room-1",
@@ -22,7 +24,7 @@ const mockRooms: Room[] = [
     maxPlayers: 4,
   },
 ];
-export default function RoomLobby() {
+export default function RoomLobby({ onEnterRoom }: RoomLobbyProps) {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -45,7 +47,10 @@ export default function RoomLobby() {
                 </p>
               </div>
 
-              <button className="rounded-md border px-3 py-1 hover:bg-gray-100">
+              <button
+                onClick={() => onEnterRoom(room.id)}
+                className="rounded-md border px-3 py-1 hover:bg-gray-100"
+              >
                 입장
               </button>
             </div>
