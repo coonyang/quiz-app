@@ -12,6 +12,7 @@ type StartScreenProps = {
   onChangeNickname: (nickname: string) => void;
   customQuizSets: QuizSet[];
   onDeleteQuizSet: (quizSetId: string) => void;
+  onEditQuizSet: (quizSet: QuizSet) => void;
 };
 export default function StartScreen({
   categories,
@@ -25,6 +26,7 @@ export default function StartScreen({
   onChangeNickname,
   customQuizSets,
   onDeleteQuizSet,
+  onEditQuizSet,
 }: StartScreenProps) {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6">
@@ -88,13 +90,23 @@ export default function StartScreen({
                   </p>
                 </button>
                 {canDeleteQuizSet && (
-                  <button
-                    type="button"
-                    onClick={() => onDeleteQuizSet(quizSet.id)}
-                    className="whitespace-nowrap rounded-md border px-5 py-1 text-sm hover:bg-red-100"
-                  >
-                    삭제
-                  </button>
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onEditQuizSet(quizSet)}
+                      className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-gray-100"
+                    >
+                      문제 추가
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => onDeleteQuizSet(quizSet.id)}
+                      className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-red-100"
+                    >
+                      삭제
+                    </button>
+                  </div>
                 )}
               </div>
             );

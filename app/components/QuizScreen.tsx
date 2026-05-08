@@ -44,7 +44,7 @@ export default function QuizScreen({
           return (
             <button
               className={choiceClass}
-              key={choice}
+              key={`${choice}-${index}`}
               onClick={() => onSelectChoice(index)}
               disabled={isAnswerChecked}
             >

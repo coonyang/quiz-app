@@ -28,6 +28,7 @@ export default function Home() {
   const [rankings, setRankings] = useState<RankingRecord[]>([]);
   const [customQuizSets, setCustomQuizSets] = useState<QuizSet[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingQuizSet, setEditingQuizSet] = useState<QuizSet | null>(null);
 
   const allQuizSets = [...quizSets, ...customQuizSets];
   const categories = [
@@ -210,6 +211,17 @@ export default function Home() {
     localStorage.setItem("rankings", JSON.stringify(nextRankings));
   };
 
+  const updateQuizSet = (updatedQuizSet: QuizSet) => {
+    const nextCustomQuizSets = customQuizSets.map((quizSet) =>
+      quizSet.id === updatedQuizSet.id ? updatedQuizSet : quizSet,
+    );
+
+    setCustomQuizSets(nextCustomQuizSets);
+    localStorage.setItem("customQuizSets", JSON.stringify(nextCustomQuizSets));
+
+    setEditingQuizSet(null);
+  };
+
   return (
     <main className="min-h-screen px-4 py-4 ">
       {!isStarted && !isFinished && (
@@ -226,6 +238,7 @@ export default function Home() {
             onChangeNickname={setNickname}
             customQuizSets={customQuizSets}
             onDeleteQuizSet={deleteCustomQuizSet}
+            onEditQuizSet={setEditingQuizSet}
           />
           <button
             className="mx-auto mt-4 block max-w-xl rounded-md border px-5 py-3 hover:bg-emerald-300"
@@ -234,12 +247,17 @@ export default function Home() {
             문제집 만들기
           </button>
 
-          {isCreateModalOpen && (
+          {(isCreateModalOpen || editingQuizSet) && (
             <CreateQuizSetModal
               nickname={nickname}
-              onClose={() => setIsCreateModalOpen(false)}
+              editingQuizSet={editingQuizSet}
+              onClose={() => {
+                setIsCreateModalOpen(false);
+                setEditingQuizSet(null);
+              }}
               categories={categories.filter((category) => category !== "전체")}
               onCreateQuizSet={createQuizSet}
+              onUpdateQuizSet={updateQuizSet}
             />
           )}
         </>

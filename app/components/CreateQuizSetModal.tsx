@@ -5,9 +5,11 @@ import type { Question, QuizSet } from "../types/quiz";
 
 type CreateQuizSetModalProps = {
   nickname: string;
+  editingQuizSet: QuizSet | null;
   onClose: () => void;
   categories: string[];
   onCreateQuizSet: (quizSet: QuizSet) => void;
+  onUpdateQuizSet: (quizSet: QuizSet) => void;
 };
 
 export default function CreateQuizSetModal({
@@ -15,13 +17,17 @@ export default function CreateQuizSetModal({
   categories,
   onClose,
   onCreateQuizSet,
+  onUpdateQuizSet,
+  editingQuizSet,
 }: CreateQuizSetModalProps) {
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [title, setTitle] = useState(editingQuizSet?.title ?? "");
+  const [category, setCategory] = useState(editingQuizSet?.category ?? "");
+  const [questions, setQuestions] = useState<Question[]>(
+    editingQuizSet?.questions ?? [],
+  );
   const [questionText, setQuestionText] = useState("");
   const [choices, setChoices] = useState(["", "", "", ""]);
   const [answerIndex, setAnswerIndex] = useState(0);
-  const [questions, setQuestions] = useState<Question[]>([]);
 
   const addQuestion = () => {
     if (!questionText.trim()) return;
@@ -40,26 +46,33 @@ export default function CreateQuizSetModal({
     setAnswerIndex(0);
   };
 
-  const createQuizSet = () => {
+  const saveQuizSet = () => {
     if (!title.trim()) return;
     if (!category.trim()) return;
     if (questions.length === 0) return;
 
-    const newQuizSet: QuizSet = {
-      id: crypto.randomUUID(),
+    const quizSet: QuizSet = {
+      id: editingQuizSet?.id ?? crypto.randomUUID(),
       title: title.trim(),
       category: category.trim(),
-      author: nickname.trim() || "익명",
+      author: (editingQuizSet?.author ?? nickname.trim()) || "익명",
       questions,
     };
-    onCreateQuizSet(newQuizSet);
+
+    if (editingQuizSet) {
+      onUpdateQuizSet(quizSet);
+    } else {
+      onCreateQuizSet(quizSet);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <section className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-lg bg-white p-6 text-black">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">문제집 만들기</h2>
+          <h2 className="text-2xl font-bold">
+            {editingQuizSet ? "문제집 수정" : "문제집 만들기"}
+          </h2>
           <button className="rounded-md border px-3 py-1" onClick={onClose}>
             닫기
           </button>
@@ -138,10 +151,10 @@ export default function CreateQuizSetModal({
 
           <button
             className="rounded-md bg-black px-5 py-3 font-semibold text-white disabled:opacity-40"
-            onClick={createQuizSet}
+            onClick={saveQuizSet}
             disabled={!title.trim() || !category || questions.length === 0}
           >
-            문제집 저장
+            {editingQuizSet ? "문제집 수정" : "문제집 저장"}
           </button>
         </div>
       </section>
