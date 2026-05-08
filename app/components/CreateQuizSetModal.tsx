@@ -30,19 +30,55 @@ export default function CreateQuizSetModal({
   const [answerIndex, setAnswerIndex] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(0);
   const previewQuestion = questions[previewIndex];
+  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(
+    null,
+  );
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const addQuestion = () => {
-    if (!questionText.trim()) return;
-    if (choices.some((choice) => !choice.trim())) return;
+  const saveQuestion = () => {
+    if (!questionText.trim()) {
+      setErrorMessage("문제를 입력해주세요.");
+      return;
+    }
+    if (!category.trim()) {
+      setErrorMessage("카테고리를 선택해주세요.");
+      return;
+    }
+    if (choices.some((choice) => !choice.trim())) {
+      setErrorMessage("선택지를 모두 입력해주세요.");
+      return;
+    }
 
-    const newQuestion: Question = {
-      id: Date.now(),
-      question: questionText.trim(),
-      choices: choices.map((choice) => choice.trim()),
-      answerIndex,
-    };
+    if (editingQuestionId) {
+      setQuestions((prev) =>
+        prev.map((question) =>
+          question.id === editingQuestionId
+            ? {
+                ...question,
+                question: questionText.trim(),
+                choices: choices.map((choice) => choice.trim()),
+                answerIndex,
+              }
+            : question,
+        ),
+      );
 
-    setQuestions((prev) => [...prev, newQuestion]);
+      setEditingQuestionId(null);
+    } else {
+      const newQuestion: Question = {
+        id: Date.now(),
+        question: questionText.trim(),
+        choices: choices.map((choice) => choice.trim()),
+        answerIndex,
+      };
+
+      setQuestions((prev) => {
+        const nextQuestions = [...prev, newQuestion];
+        setPreviewIndex(nextQuestions.length - 1);
+        return nextQuestions;
+      });
+    }
+
     setQuestionText("");
     setChoices(["", "", "", ""]);
     setAnswerIndex(0);
@@ -83,6 +119,13 @@ export default function CreateQuizSetModal({
     });
   };
 
+  const startEditQuestion = (question: Question) => {
+    setEditingQuestionId(question.id);
+    setQuestionText(question.question);
+    setChoices(question.choices);
+    setAnswerIndex(question.answerIndex);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <section className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-lg bg-white p-6 text-black">
@@ -90,6 +133,11 @@ export default function CreateQuizSetModal({
           <h2 className="text-2xl font-bold">
             {editingQuizSet ? "문제집 수정" : "문제집 만들기"}
           </h2>
+          {errorMessage && (
+            <p className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+              {errorMessage}
+            </p>
+          )}
           <button className="rounded-md border px-3 py-1" onClick={onClose}>
             닫기
           </button>
@@ -158,9 +206,9 @@ export default function CreateQuizSetModal({
 
             <button
               className="mt-3 w-full rounded-md border px-4 py-2 hover:bg-emerald-300"
-              onClick={addQuestion}
+              onClick={saveQuestion}
             >
-              문제 추가
+              {editingQuestionId ? "문제 수정 완료" : "문제 추가"}
             </button>
           </div>
 
@@ -171,14 +219,22 @@ export default function CreateQuizSetModal({
                 <p className="font-semibold">
                   {previewIndex + 1} / {questions.length}
                 </p>
-
-                <button
-                  type="button"
-                  onClick={() => deleteQuestion(previewQuestion.id)}
-                  className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-red-100"
-                >
-                  삭제
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => startEditQuestion(previewQuestion)}
+                    className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-gray-100"
+                  >
+                    수정
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteQuestion(previewQuestion.id)}
+                    className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-red-100"
+                  >
+                    삭제
+                  </button>
+                </div>
               </div>
 
               <p className="font-semibold">{previewQuestion.question}</p>
