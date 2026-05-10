@@ -170,6 +170,8 @@ export default function HomeClient() {
     setEnteredRoomId(null);
   };
 
+  const enteredRoom = rooms.find((room) => room.id === enteredRoomId);
+
   /* 문제집 관리 함수 */
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
@@ -407,11 +409,12 @@ export default function HomeClient() {
                 </>
               )}
 
-              {playMode === "online" && enteredRoomId && (
+              {playMode === "online" && enteredRoom && (
                 <RoomScreen
-                  roomId={enteredRoomId}
+                  room={enteredRoom}
                   nickname={nickname}
                   onLeaveRoom={leaveRoom}
+                  currentPlayerId={currentPlayerId}
                 />
               )}
             </>

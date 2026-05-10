@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { Room } from "../types/quiz";
 
 type RoomScreenProps = {
-  roomId: string;
+  room: Room;
   nickname: string;
   onLeaveRoom: () => void;
+  currentPlayerId: string;
 };
 type ChatMessage = {
   id: string;
@@ -13,20 +15,16 @@ type ChatMessage = {
   message: string;
 };
 
-const mockPlayers = [
-  { id: "player-1", nickname: "관리자", score: 0, isHost: true },
-  { id: "player-2", nickname: "게스트", score: 0, isHost: false },
-];
-
 const initialMessages: ChatMessage[] = [
   { id: "message-1", nickname: "관리자", message: "시작할까요?" },
   { id: "message-2", nickname: "게스트", message: "ㄱㄱ" },
 ];
 
 export default function RoomScreen({
-  roomId,
+  room,
   nickname,
   onLeaveRoom,
+  currentPlayerId,
 }: RoomScreenProps) {
   const [messages, setMessages] = useState(initialMessages);
   const [messageText, setMessageText] = useState("");
@@ -42,6 +40,9 @@ export default function RoomScreen({
     setMessages((prev) => [...prev, newMessage]);
     setMessageText("");
   };
+  const isHost = room.players.some(
+    (player) => player.id === currentPlayerId && player.isHost,
+  );
 
   return (
     <section className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -49,8 +50,11 @@ export default function RoomScreen({
         <div className="rounded-lg border p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm text-gray-500">room id:{roomId}</p>
-              <h1 className="text-2xl font-bold">수학 빠른방</h1>
+              <p className="text-sm text-gray-500">room id:{room.id}</p>
+              <h1 className="text-2xl font-bold">{room.title}</h1>
+              <p className="mt-1 text-sm text-gray-500">
+                문제집: {room.quizSetTitle}
+              </p>
             </div>
 
             <button
@@ -66,7 +70,7 @@ export default function RoomScreen({
           <h2 className="mb-3 text-lg font-semibold">참가자</h2>
 
           <div className="grid gap-2">
-            {mockPlayers.map((player) => (
+            {room.players.map((player) => (
               <div
                 key={player.id}
                 className="flex items-center justify-between rounded-md border px-4 py-3"
@@ -74,7 +78,7 @@ export default function RoomScreen({
                 <div>
                   <p className="font-semibold">
                     {player.nickname}
-                    {player.nickname === nickname ? " (나)" : ""}
+                    {player.id === currentPlayerId ? " (나)" : ""}
                   </p>
                   <p className="text-sm text-gray-500">
                     {player.isHost ? "방장" : "참가자"}
@@ -93,9 +97,11 @@ export default function RoomScreen({
             아직 게임이 시작되지 않았습니다.
           </p>
 
-          <button className="mt-4 w-full rounded-md border px-5 py-3 hover:bg-emerald-300">
-            게임 시작
-          </button>
+          {isHost && (
+            <button className="mt-4 w-full rounded-md border px-5 py-3 hover:bg-emerald-300">
+              게임 시작
+            </button>
+          )}
         </div>
       </div>
 
