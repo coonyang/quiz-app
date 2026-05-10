@@ -1,49 +1,66 @@
 "use client";
 
-import { Room } from "../types/quiz";
-import CreateRoomModal from "./CreateRoomModal";
 import CreateQuizSetModal from "../components/CreateQuizSetModal";
+import CreateRoomModal from "./CreateRoomModal";
 import QuizScreen from "./QuizScreen";
 import ResultScreen from "./ResultScreen";
-import StartScreen from "./StartScreen";
-import { quizSets } from "../data/quizSets";
-import { useState, useEffect } from "react";
-import type { RankingRecord, Question, QuizSet } from "../types/quiz";
 import RoomLobby from "./RoomLobby";
 import RoomScreen from "./RoomScreen";
+import StartScreen from "./StartScreen";
+import { quizSets } from "../data/quizSets";
+import { useEffect, useState } from "react";
+import type { RankingRecord, Question, QuizSet, Room } from "../types/quiz";
 
 export default function HomeClient() {
+  const TIME_LIMIT = 30;
+
+  /* 혼자 풀기 퀴즈 상태 */
   const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isStarted, setIsStarted] = useState(false);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("전체");
-  const [selectedQuizSetId, setSelectedQuizSetId] = useState("");
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
   const [answers, setAnswers] = useState<number[]>([]);
-  const [nickname, setNickname] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [finishTime, setFinishTime] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const TIME_LIMIT = 30;
-  const [rankings, setRankings] = useState<RankingRecord[]>([]);
+  const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
+
+  /* 유저와 문제집 상태 */
+  const [nickname, setNickname] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedQuizSetId, setSelectedQuizSetId] = useState("");
   const [customQuizSets, setCustomQuizSets] = useState<QuizSet[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingQuizSet, setEditingQuizSet] = useState<QuizSet | null>(null);
+
+  /* 랭킹 상태 */
+  const [rankings, setRankings] = useState<RankingRecord[]>([]);
+
+  /* 온라인 방 상태 */
   const [playMode, setPlayMode] = useState<"solo" | "online">("solo");
   const [enteredRoomId, setEnteredRoomId] = useState<string | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
 
+  /* 화면에서 바로 계산해서 쓰는 데이터 */
   const allQuizSets = [...quizSets, ...customQuizSets];
+
   const categories = [
     "전체",
     ...new Set(allQuizSets.map((item) => item.category)),
   ];
 
+  const visibleQuizSets =
+    selectedCategory === "전체" || selectedCategory === ""
+      ? allQuizSets
+      : allQuizSets.filter((item) => item.category === selectedCategory);
+
+  const currentQuestion = quizQuestions[currentIndex];
+
+  /* localStorage에 저장된 데이터 불러오기 */
   useEffect(() => {
     const savedCustomQuizSets = localStorage.getItem("customQuizSets");
 
@@ -61,6 +78,15 @@ export default function HomeClient() {
   }, []);
 
   useEffect(() => {
+    const savedRankings = localStorage.getItem("rankings");
+
+    if (savedRankings) {
+      setRankings(JSON.parse(savedRankings));
+    }
+  }, []);
+
+  /* 혼자 풀기 퀴즈 타이머 */
+  useEffect(() => {
     if (!isStarted || isAnswerChecked) return;
 
     if (timeLeft <= 0) {
@@ -75,31 +101,58 @@ export default function HomeClient() {
     return () => clearTimeout(timerId);
   }, [isStarted, isAnswerChecked, timeLeft]);
 
-  useEffect(() => {
-    const savedRankings = localStorage.getItem("rankings");
-
-    if (savedRankings) {
-      setRankings(JSON.parse(savedRankings));
-    }
-  }, []);
-
+  /* 퀴즈 종료 후 랭킹 저장 */
   useEffect(() => {
     if (!isFinished || !finishTime || !startTime) return;
 
     saveRanking(finishTime);
   }, [isFinished, finishTime]);
 
-  const visibleQuizSets =
-    selectedCategory === "전체" || selectedCategory === ""
-      ? allQuizSets
-      : allQuizSets.filter((item) => item.category === selectedCategory);
-
+  /* 온라인 방 관련 함수 */
   const createRoom = (room: Room) => {
     setRooms((prev) => [room, ...prev]);
     setIsCreateRoomModalOpen(false);
     setEnteredRoomId(room.id);
   };
 
+  const enterRoom = (roomId: string) => {
+    setRooms((prev) =>
+      prev.map((room) =>
+        room.id === roomId
+          ? {
+              ...room,
+              currentPlayers: Math.min(
+                room.currentPlayers + 1,
+                room.maxPlayers,
+              ),
+            }
+          : room,
+      ),
+    );
+
+    setEnteredRoomId(roomId);
+  };
+
+  const leaveRoom = () => {
+    if (!enteredRoomId) return;
+
+    setRooms((prev) =>
+      prev
+        .map((room) =>
+          room.id === enteredRoomId
+            ? {
+                ...room,
+                currentPlayers: room.currentPlayers - 1,
+              }
+            : room,
+        )
+        .filter((room) => room.currentPlayers > 0),
+    );
+
+    setEnteredRoomId(null);
+  };
+
+  /* 문제집 관리 함수 */
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
     setSelectedQuizSetId("");
@@ -116,6 +169,17 @@ export default function HomeClient() {
     setIsCreateModalOpen(false);
   };
 
+  const updateQuizSet = (updatedQuizSet: QuizSet) => {
+    const nextCustomQuizSets = customQuizSets.map((quizSet) =>
+      quizSet.id === updatedQuizSet.id ? updatedQuizSet : quizSet,
+    );
+
+    setCustomQuizSets(nextCustomQuizSets);
+    localStorage.setItem("customQuizSets", JSON.stringify(nextCustomQuizSets));
+
+    setEditingQuizSet(null);
+  };
+
   const deleteCustomQuizSet = (quizSetId: string) => {
     const nextCustomQuizSets = customQuizSets.filter(
       (quizSet) => quizSet.id !== quizSetId,
@@ -129,6 +193,7 @@ export default function HomeClient() {
     }
   };
 
+  /* 혼자 풀기 퀴즈 진행 함수 */
   const startQuiz = () => {
     if (!nickname.trim()) return;
 
@@ -157,8 +222,6 @@ export default function HomeClient() {
     setAnswers([]);
   };
 
-  const currentQuestion = quizQuestions[currentIndex];
-
   const selectChoice = (choiceIndex: number) => {
     if (isAnswerChecked) return;
 
@@ -181,7 +244,6 @@ export default function HomeClient() {
         setTimeLeft(TIME_LIMIT);
       } else {
         setFinishTime(Date.now());
-
         setIsStarted(false);
         setIsFinished(true);
         setSelectedChoice(null);
@@ -190,6 +252,22 @@ export default function HomeClient() {
     }, 300);
   };
 
+  const goHome = () => {
+    setIsStarted(false);
+    setIsFinished(false);
+    setQuizQuestions([]);
+    setCurrentIndex(0);
+    setSelectedChoice(null);
+    setIsAnswerChecked(false);
+    setAnswers([]);
+    setScore(0);
+    setCorrectCount(0);
+    setStartTime(null);
+    setFinishTime(null);
+    setTimeLeft(TIME_LIMIT);
+  };
+
+  /* 랭킹 관련 함수 */
   const saveRanking = (finishedAt: number) => {
     if (!startTime) return;
 
@@ -225,34 +303,8 @@ export default function HomeClient() {
     localStorage.setItem("rankings", JSON.stringify(nextRankings));
   };
 
-  const updateQuizSet = (updatedQuizSet: QuizSet) => {
-    const nextCustomQuizSets = customQuizSets.map((quizSet) =>
-      quizSet.id === updatedQuizSet.id ? updatedQuizSet : quizSet,
-    );
-
-    setCustomQuizSets(nextCustomQuizSets);
-    localStorage.setItem("customQuizSets", JSON.stringify(nextCustomQuizSets));
-
-    setEditingQuizSet(null);
-  };
-
-  const goHome = () => {
-    setIsStarted(false);
-    setIsFinished(false);
-    setQuizQuestions([]);
-    setCurrentIndex(0);
-    setSelectedChoice(null);
-    setIsAnswerChecked(false);
-    setAnswers([]);
-    setScore(0);
-    setCorrectCount(0);
-    setStartTime(null);
-    setFinishTime(null);
-    setTimeLeft(TIME_LIMIT);
-  };
-
   return (
-    <main className="min-h-screen px-4 py-4 ">
+    <main className="min-h-screen px-4 py-4">
       <div className="mx-auto max-w-6xl">
         <section className="min-w-0">
           {!isStarted && !isFinished && (
@@ -260,10 +312,15 @@ export default function HomeClient() {
               <div className="mx-auto mb-4 flex max-w-xl gap-2">
                 <button
                   onClick={() => setPlayMode("solo")}
-                  className={`flex-1 rounded-md border px-4 py-2 ${playMode === "solo" ? "bg-black text-white" : "bg-white text-black"}`}
+                  className={`flex-1 rounded-md border px-4 py-2 ${
+                    playMode === "solo"
+                      ? "bg-black text-white"
+                      : "bg-white text-black"
+                  }`}
                 >
                   혼자 풀기
                 </button>
+
                 <button
                   onClick={() => setPlayMode("online")}
                   className={`flex-1 rounded-md border px-4 py-2 ${
@@ -275,6 +332,7 @@ export default function HomeClient() {
                   온라인 방
                 </button>
               </div>
+
               {playMode === "solo" && (
                 <>
                   <StartScreen
@@ -316,8 +374,9 @@ export default function HomeClient() {
                   <RoomLobby
                     rooms={rooms}
                     onOpenCreateRoomModal={() => setIsCreateRoomModalOpen(true)}
-                    onEnterRoom={setEnteredRoomId}
+                    onEnterRoom={enterRoom}
                   />
+
                   {isCreateRoomModalOpen && (
                     <CreateRoomModal
                       nickname={nickname}
@@ -328,11 +387,12 @@ export default function HomeClient() {
                   )}
                 </>
               )}
+
               {playMode === "online" && enteredRoomId && (
                 <RoomScreen
                   roomId={enteredRoomId}
                   nickname={nickname}
-                  onLeaveRoom={() => setEnteredRoomId(null)}
+                  onLeaveRoom={leaveRoom}
                 />
               )}
             </>
@@ -349,6 +409,7 @@ export default function HomeClient() {
               timeLeft={timeLeft}
             />
           )}
+
           {isFinished && (
             <ResultScreen
               quizQuestions={quizQuestions}
