@@ -41,4 +41,13 @@ export type Room = {
   hostNickname: string;
   players: Player[];
   maxPlayers: number;
+  messages: ChatMessage[];
+};
+
+export type ChatMessage = {
+  id: string;
+  nickname: string;
+  message: string;
+  createdAt: string;
+  playerId: string;
 };

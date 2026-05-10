@@ -9,7 +9,13 @@ import RoomScreen from "./RoomScreen";
 import StartScreen from "./StartScreen";
 import { quizSets } from "../data/quizSets";
 import { useEffect, useState } from "react";
-import type { RankingRecord, Question, QuizSet, Room } from "../types/quiz";
+import type {
+  RankingRecord,
+  Question,
+  QuizSet,
+  Room,
+  ChatMessage,
+} from "../types/quiz";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
@@ -171,6 +177,19 @@ export default function HomeClient() {
   };
 
   const enteredRoom = rooms.find((room) => room.id === enteredRoomId);
+
+  const sendRoomMessage = (roomId: string, message: ChatMessage) => {
+    setRooms((prev) =>
+      prev.map((room) =>
+        room.id === roomId
+          ? {
+              ...room,
+              messages: [...room.messages, message],
+            }
+          : room,
+      ),
+    );
+  };
 
   /* 문제집 관리 함수 */
   const handleSelectCategory = (category: string) => {
@@ -415,6 +434,7 @@ export default function HomeClient() {
                   nickname={nickname}
                   onLeaveRoom={leaveRoom}
                   currentPlayerId={currentPlayerId}
+                  onSendMessage={sendRoomMessage}
                 />
               )}
             </>

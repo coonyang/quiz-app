@@ -51,6 +51,15 @@ export default function CreateRoomModal({
         },
       ],
       maxPlayers,
+      messages: [
+        {
+          id: crypto.randomUUID(),
+          playerId: "system",
+          nickname: "시스템",
+          message: `${hostNickname}님이 방을 만들었습니다.`,
+          createdAt: new Date().toISOString(),
+        },
+      ],
     };
 
     onCreateRoom(newRoom);

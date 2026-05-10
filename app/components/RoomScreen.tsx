@@ -1,32 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Room } from "../types/quiz";
+import type { Room, ChatMessage } from "../types/quiz";
 
 type RoomScreenProps = {
   room: Room;
   nickname: string;
   onLeaveRoom: () => void;
   currentPlayerId: string;
+  onSendMessage: (roomId: string, message: ChatMessage) => void;
 };
-type ChatMessage = {
-  id: string;
-  nickname: string;
-  message: string;
-};
-
-const initialMessages: ChatMessage[] = [
-  { id: "message-1", nickname: "관리자", message: "시작할까요?" },
-  { id: "message-2", nickname: "게스트", message: "ㄱㄱ" },
-];
 
 export default function RoomScreen({
   room,
   nickname,
   onLeaveRoom,
   currentPlayerId,
+  onSendMessage,
 }: RoomScreenProps) {
-  const [messages, setMessages] = useState(initialMessages);
   const [messageText, setMessageText] = useState("");
   const sendMessage = () => {
     if (!messageText.trim()) return;
@@ -35,9 +26,11 @@ export default function RoomScreen({
       id: crypto.randomUUID(),
       nickname: nickname.trim() || "익명",
       message: messageText,
+      createdAt: new Date().toISOString(),
+      playerId: currentPlayerId,
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    onSendMessage(room.id, newMessage);
     setMessageText("");
   };
   const isHost = room.players.some(
@@ -109,7 +102,7 @@ export default function RoomScreen({
         <h2 className="mb-3 text-lg font-semibold">채팅</h2>
 
         <div className="flex-1 space-y-3 overflow-y-auto rounded-md border p-3">
-          {messages.map((message) => (
+          {room.messages.map((message) => (
             <div key={message.id}>
               <p className="text-sm font-semibold">{message.nickname}</p>
               <p className="text-sm">{message.message}</p>
