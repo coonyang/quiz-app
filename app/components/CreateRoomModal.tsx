@@ -61,6 +61,8 @@ export default function CreateRoomModal({
         },
       ],
       status: "waiting",
+      currentQuestionIndex: 0,
+      quizQuestions: selectedQuizSet.questions,
     };
 
     onCreateRoom(newRoom);

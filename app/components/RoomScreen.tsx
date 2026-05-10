@@ -38,6 +38,7 @@ export default function RoomScreen({
   const isHost = room.players.some(
     (player) => player.id === currentPlayerId && player.isHost,
   );
+  const currentQuestion = room.quizQuestions[room.currentQuestionIndex];
 
   return (
     <section className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -93,7 +94,19 @@ export default function RoomScreen({
               아직 게임이 시작되지 않았습니다.
             </p>
           ) : (
-            <p className="text-sm text-gray-500">게임이 진행중입니다.</p>
+            <>
+              <p className="text-sm text-gray-500">게임이 진행중입니다.</p>
+              <div>
+                <p>
+                  {room.currentQuestionIndex + 1} / {room.quizQuestions.length}
+                </p>
+                <h2>{currentQuestion.question}</h2>
+
+                {currentQuestion.choices.map((choice, index) => (
+                  <button key={index}>{choice}</button>
+                ))}
+              </div>
+            </>
           )}
 
           {isHost && room.status === "waiting" && (

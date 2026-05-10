@@ -43,6 +43,8 @@ export type Room = {
   maxPlayers: number;
   messages: ChatMessage[];
   status: "waiting" | "playing";
+  currentQuestionIndex: number;
+  quizQuestions: Question[];
 };
 
 export type ChatMessage = {
