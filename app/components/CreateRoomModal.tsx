@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import type { QuizSet } from "../types/quiz";
-import type { Room } from "../types/quiz";
+import type { Room, QuizSet } from "../types/quiz";
 
 type CreateRoomModalProps = {
   nickname: string;
+  currentPlayerId: string;
   quizSets: QuizSet[];
   onClose: () => void;
   onCreateRoom: (room: Room) => void;
 };
 export default function CreateRoomModal({
   nickname,
+  currentPlayerId,
   quizSets,
   onClose,
   onCreateRoom,
@@ -34,14 +35,21 @@ export default function CreateRoomModal({
       setErrorMessage("문제집을 선택해주세요.");
       return;
     }
-
+    const hostNickname = nickname.trim() || "익명";
     const newRoom: Room = {
       id: crypto.randomUUID(),
       title: title.trim(),
       quizSetId: selectedQuizSet.id,
       quizSetTitle: selectedQuizSet.title,
-      hostNickname: nickname.trim() || "익명",
-      currentPlayers: 1,
+      hostNickname,
+      players: [
+        {
+          id: currentPlayerId,
+          nickname: hostNickname,
+          isHost: true,
+          score: 0,
+        },
+      ],
       maxPlayers,
     };
 

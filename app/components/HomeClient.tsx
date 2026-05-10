@@ -44,6 +44,7 @@ export default function HomeClient() {
   const [enteredRoomId, setEnteredRoomId] = useState<string | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
+  const [currentPlayerId] = useState(() => crypto.randomUUID());
 
   /* 화면에서 바로 계산해서 쓰는 데이터 */
   const allQuizSets = [...quizSets, ...customQuizSets];
@@ -116,18 +117,33 @@ export default function HomeClient() {
   };
 
   const enterRoom = (roomId: string) => {
+    const playerNickname = nickname.trim() || "익명";
+
     setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId
-          ? {
-              ...room,
-              currentPlayers: Math.min(
-                room.currentPlayers + 1,
-                room.maxPlayers,
-              ),
-            }
-          : room,
-      ),
+      prev.map((room) => {
+        if (room.id !== roomId) return room;
+
+        const alreadyJoined = room.players.some(
+          (player) => player.id === currentPlayerId,
+        );
+
+        if (alreadyJoined) return room;
+
+        if (room.players.length >= room.maxPlayers) return room;
+
+        return {
+          ...room,
+          players: [
+            ...room.players,
+            {
+              id: currentPlayerId,
+              nickname: playerNickname,
+              isHost: false,
+              score: 0,
+            },
+          ],
+        };
+      }),
     );
 
     setEnteredRoomId(roomId);
@@ -142,11 +158,13 @@ export default function HomeClient() {
           room.id === enteredRoomId
             ? {
                 ...room,
-                currentPlayers: room.currentPlayers - 1,
+                players: room.players.filter(
+                  (player) => player.id !== currentPlayerId,
+                ),
               }
             : room,
         )
-        .filter((room) => room.currentPlayers > 0),
+        .filter((room) => room.players.length > 0),
     );
 
     setEnteredRoomId(null);
@@ -380,6 +398,7 @@ export default function HomeClient() {
                   {isCreateRoomModalOpen && (
                     <CreateRoomModal
                       nickname={nickname}
+                      currentPlayerId={currentPlayerId}
                       quizSets={allQuizSets}
                       onClose={() => setIsCreateRoomModalOpen(false)}
                       onCreateRoom={createRoom}

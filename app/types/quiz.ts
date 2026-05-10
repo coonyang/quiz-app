@@ -26,12 +26,19 @@ export type QuizSet = {
   questions: Question[];
 };
 
+export type Player = {
+  id: string;
+  nickname: string;
+  isHost: boolean;
+  score: number;
+};
+
 export type Room = {
   id: string;
   title: string;
   quizSetId: string;
   quizSetTitle: string;
   hostNickname: string;
-  currentPlayers: number;
+  players: Player[];
   maxPlayers: number;
 };

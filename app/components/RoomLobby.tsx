@@ -39,16 +39,16 @@ export default function RoomLobby({
                 </p>
 
                 <p className="mt-2 text-sm font-medium">
-                  인원: {room.currentPlayers} / {room.maxPlayers}
+                  인원: {room.players.length} / {room.maxPlayers}
                 </p>
               </div>
 
               <button
                 onClick={() => onEnterRoom(room.id)}
-                disabled={room.currentPlayers >= room.maxPlayers}
+                disabled={room.players.length >= room.maxPlayers}
                 className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {room.currentPlayers >= room.maxPlayers ? "가득참" : "입장"}
+                {room.players.length >= room.maxPlayers ? "가득참" : "입장"}
               </button>
             </div>
           </div>
