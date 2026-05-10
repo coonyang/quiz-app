@@ -60,6 +60,7 @@ export default function CreateRoomModal({
           createdAt: new Date().toISOString(),
         },
       ],
+      status: "waiting",
     };
 
     onCreateRoom(newRoom);

@@ -42,6 +42,7 @@ export type Room = {
   players: Player[];
   maxPlayers: number;
   messages: ChatMessage[];
+  status: "waiting" | "playing";
 };
 
 export type ChatMessage = {

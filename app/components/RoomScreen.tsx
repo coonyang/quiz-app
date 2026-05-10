@@ -9,6 +9,7 @@ type RoomScreenProps = {
   onLeaveRoom: () => void;
   currentPlayerId: string;
   onSendMessage: (roomId: string, message: ChatMessage) => void;
+  onStartGame: (roomId: string) => void;
 };
 
 export default function RoomScreen({
@@ -17,6 +18,7 @@ export default function RoomScreen({
   onLeaveRoom,
   currentPlayerId,
   onSendMessage,
+  onStartGame,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
   const sendMessage = () => {
@@ -86,12 +88,21 @@ export default function RoomScreen({
 
         <div className="rounded-lg border p-5">
           <h2 className="mb-3 text-lg font-semibold">게임</h2>
-          <p className="text-sm text-gray-500">
-            아직 게임이 시작되지 않았습니다.
-          </p>
+          {room.status === "waiting" ? (
+            <p className="text-sm text-gray-500">
+              아직 게임이 시작되지 않았습니다.
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500">게임이 진행중입니다.</p>
+          )}
 
-          {isHost && (
-            <button className="mt-4 w-full rounded-md border px-5 py-3 hover:bg-emerald-300">
+          {isHost && room.status === "waiting" && (
+            <button
+              onClick={() => {
+                onStartGame(room.id);
+              }}
+              className="mt-4 w-full rounded-md border px-5 py-3 hover:bg-emerald-300"
+            >
               게임 시작
             </button>
           )}
