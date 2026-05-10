@@ -10,6 +10,11 @@ type RoomScreenProps = {
   currentPlayerId: string;
   onSendMessage: (roomId: string, message: ChatMessage) => void;
   onStartGame: (roomId: string) => void;
+  submitRoomAnswer: (
+    roomId: string,
+    playerId: string,
+    choiceIndex: number,
+  ) => void;
 };
 
 export default function RoomScreen({
@@ -19,6 +24,7 @@ export default function RoomScreen({
   currentPlayerId,
   onSendMessage,
   onStartGame,
+  submitRoomAnswer,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
   const sendMessage = () => {
@@ -103,7 +109,14 @@ export default function RoomScreen({
                 <h2>{currentQuestion.question}</h2>
 
                 {currentQuestion.choices.map((choice, index) => (
-                  <button key={index}>{choice}</button>
+                  <button
+                    onClick={() =>
+                      submitRoomAnswer(room.id, currentPlayerId, index)
+                    }
+                    key={index}
+                  >
+                    {choice}
+                  </button>
                 ))}
               </div>
             </>
