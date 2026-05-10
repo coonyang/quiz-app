@@ -25,3 +25,13 @@ export type QuizSet = {
   author: string;
   questions: Question[];
 };
+
+export type Room = {
+  id: string;
+  title: string;
+  quizSetId: string;
+  quizSetTitle: string;
+  hostNickname: string;
+  currentPlayers: number;
+  maxPlayers: number;
+};

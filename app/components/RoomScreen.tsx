@@ -49,7 +49,7 @@ export default function RoomScreen({
         <div className="rounded-lg border p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm text-gray-500">{roomId}</p>
+              <p className="text-sm text-gray-500">room id:{roomId}</p>
               <h1 className="text-2xl font-bold">수학 빠른방</h1>
             </div>
 

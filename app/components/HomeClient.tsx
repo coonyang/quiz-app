@@ -1,9 +1,11 @@
 "use client";
 
+import { Room } from "../types/quiz";
+import CreateRoomModal from "./CreateRoomModal";
 import CreateQuizSetModal from "../components/CreateQuizSetModal";
-import QuizScreen from "../components/QuizScreen";
-import ResultScreen from "../components/ResultScreen";
-import StartScreen from "../components/StartScreen";
+import QuizScreen from "./QuizScreen";
+import ResultScreen from "./ResultScreen";
+import StartScreen from "./StartScreen";
 import { quizSets } from "../data/quizSets";
 import { useState, useEffect } from "react";
 import type { RankingRecord, Question, QuizSet } from "../types/quiz";
@@ -33,6 +35,8 @@ export default function HomeClient() {
   const [editingQuizSet, setEditingQuizSet] = useState<QuizSet | null>(null);
   const [playMode, setPlayMode] = useState<"solo" | "online">("solo");
   const [enteredRoomId, setEnteredRoomId] = useState<string | null>(null);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
 
   const allQuizSets = [...quizSets, ...customQuizSets];
   const categories = [
@@ -89,6 +93,12 @@ export default function HomeClient() {
     selectedCategory === "전체" || selectedCategory === ""
       ? allQuizSets
       : allQuizSets.filter((item) => item.category === selectedCategory);
+
+  const createRoom = (room: Room) => {
+    setRooms((prev) => [room, ...prev]);
+    setIsCreateRoomModalOpen(false);
+    setEnteredRoomId(room.id);
+  };
 
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
@@ -243,7 +253,7 @@ export default function HomeClient() {
 
   return (
     <main className="min-h-screen px-4 py-4 ">
-      <div className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mx-auto max-w-6xl">
         <section className="min-w-0">
           {!isStarted && !isFinished && (
             <>
@@ -302,7 +312,21 @@ export default function HomeClient() {
               )}
 
               {playMode === "online" && !enteredRoomId && (
-                <RoomLobby onEnterRoom={setEnteredRoomId} />
+                <>
+                  <RoomLobby
+                    rooms={rooms}
+                    onOpenCreateRoomModal={() => setIsCreateRoomModalOpen(true)}
+                    onEnterRoom={setEnteredRoomId}
+                  />
+                  {isCreateRoomModalOpen && (
+                    <CreateRoomModal
+                      nickname={nickname}
+                      quizSets={allQuizSets}
+                      onClose={() => setIsCreateRoomModalOpen(false)}
+                      onCreateRoom={createRoom}
+                    />
+                  )}
+                </>
               )}
               {playMode === "online" && enteredRoomId && (
                 <RoomScreen
