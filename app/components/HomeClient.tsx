@@ -213,6 +213,9 @@ export default function HomeClient() {
         return {
           ...room,
           players: room.players.map((player) => {
+            if (player.id !== playerId) {
+              return player;
+            }
             if (player.answeredQuestionIndex === room.currentQuestionIndex) {
               return player;
             }

@@ -45,6 +45,11 @@ export default function RoomScreen({
     (player) => player.id === currentPlayerId && player.isHost,
   );
   const currentQuestion = room.quizQuestions[room.currentQuestionIndex];
+  const currentPlayer = room.players.find(
+    (player) => player.id === currentPlayerId,
+  );
+  const hasAnswered =
+    currentPlayer?.answeredQuestionIndex === room.currentQuestionIndex;
 
   return (
     <section className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -113,6 +118,7 @@ export default function RoomScreen({
                     onClick={() =>
                       submitRoomAnswer(room.id, currentPlayerId, index)
                     }
+                    disabled={hasAnswered}
                     key={index}
                   >
                     {choice}
