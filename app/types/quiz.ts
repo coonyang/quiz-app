@@ -46,6 +46,8 @@ export type Room = {
   status: "waiting" | "playing";
   currentQuestionIndex: number;
   quizQuestions: Question[];
+  questionStartedAt: number | null;
+  timeLimit: number;
 };
 
 export type ChatMessage = {

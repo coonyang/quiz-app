@@ -15,6 +15,7 @@ type RoomScreenProps = {
     playerId: string,
     choiceIndex: number,
   ) => void;
+  goNextRoomQuestion: (roomId: string) => void;
 };
 
 export default function RoomScreen({
@@ -25,6 +26,7 @@ export default function RoomScreen({
   onSendMessage,
   onStartGame,
   submitRoomAnswer,
+  goNextRoomQuestion,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
   const sendMessage = () => {
@@ -124,6 +126,14 @@ export default function RoomScreen({
                     {choice}
                   </button>
                 ))}
+                {isHost && hasAnswered && (
+                  <button
+                    onClick={() => goNextRoomQuestion(room.id)}
+                    className="mt-4 rounded-md border px-4 py-2 hover:bg-gray-100"
+                  >
+                    다음 문제
+                  </button>
+                )}
               </div>
             </>
           )}
