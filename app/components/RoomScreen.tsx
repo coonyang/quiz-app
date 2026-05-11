@@ -52,6 +52,7 @@ export default function RoomScreen({
   );
   const hasAnswered =
     currentPlayer?.answeredQuestionIndex === room.currentQuestionIndex;
+  const sortedPlayers = [...room.players].sort((a, b) => b.score - a.score);
 
   return (
     <section className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -102,11 +103,12 @@ export default function RoomScreen({
 
         <div className="rounded-lg border p-5">
           <h2 className="mb-3 text-lg font-semibold">게임</h2>
-          {room.status === "waiting" ? (
+          {room.status === "waiting" && (
             <p className="text-sm text-gray-500">
               아직 게임이 시작되지 않았습니다.
             </p>
-          ) : (
+          )}
+          {room.status === "playing" && (
             <>
               <p className="text-sm text-gray-500">게임이 진행중입니다.</p>
               <div>
@@ -137,7 +139,32 @@ export default function RoomScreen({
               </div>
             </>
           )}
+          {room.status === "finished" && (
+            <div>
+              <h3 className="text-xl font-bold">최종 순위</h3>
 
+              <div className="mt-3 grid gap-2">
+                {sortedPlayers.map((player, index) => (
+                  <div
+                    key={player.id}
+                    className="flex items-center justify-between rounded-md border px-4 py-3"
+                  >
+                    <div>
+                      <p className="font-semibold">
+                        {index + 1}. {player.nickname}
+                        {player.id === currentPlayerId ? " (나)" : ""}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {player.isHost ? "방장" : "참가자"}
+                      </p>
+                    </div>
+
+                    <p className="font-semibold">{player.score}점</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {isHost && room.status === "waiting" && (
             <button
               onClick={() => {

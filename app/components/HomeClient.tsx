@@ -236,7 +236,12 @@ export default function HomeClient() {
         if (room.id !== roomId) return room;
         const isLastQuestion =
           room.currentQuestionIndex >= room.quizQuestions.length - 1;
-        if (isLastQuestion) return room;
+        if (isLastQuestion) {
+          return {
+            ...room,
+            status: "finished",
+          };
+        }
 
         return {
           ...room,
