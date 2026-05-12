@@ -76,7 +76,10 @@ export default function CreateRoomModal({
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-2xl font-bold">방 만들기</h2>
 
-          <button className="rounded-md border px-3 py-1" onClick={onClose}>
+          <button
+            className="rounded-md border px-3 py-1 hover:bg-zinc-200"
+            onClick={onClose}
+          >
             닫기
           </button>
         </div>

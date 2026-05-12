@@ -106,38 +106,69 @@ export default function RoomScreen({
           <h2 className="mb-3 text-lg font-semibold">참가자</h2>
 
           <div className="grid gap-2">
-            {room.players.map((player) => (
-              <div
-                key={player.id}
-                className="flex items-center justify-between rounded-md border px-4 py-3"
-              >
-                <div>
-                  <p className="font-semibold">
-                    {player.nickname}
-                    {player.id === currentPlayerId ? " (나)" : ""}
-                    {player.answeredQuestionIndex ==
-                      room.currentQuestionIndex && room.status == "playing"
-                      ? "✅"
-                      : ""}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {player.isHost ? "방장" : "참가자"}
-                  </p>
-                </div>
+            {Array.from({ length: room.maxPlayers }).map((_, index) => {
+              const player = room.players[index];
+              if (player) {
+                return (
+                  <div
+                    key={player.id}
+                    className="flex items-center justify-between rounded-md border px-4 py-3"
+                  >
+                    <div>
+                      <p className="font-semibold">
+                        {player.nickname}
+                        {player.id === currentPlayerId ? " (나)" : ""}
+                        {player.answeredQuestionIndex ==
+                          room.currentQuestionIndex && room.status == "playing"
+                          ? "✅"
+                          : ""}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {player.isHost ? "방장" : "참가자"}
+                      </p>
+                    </div>
 
-                <p className="font-semibold">{player.score}점</p>
-              </div>
-            ))}
+                    <p className="font-semibold">{player.score}점</p>
+                  </div>
+                );
+              }
+              if (!player) {
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-md border px-4 py-3"
+                  >
+                    <div className="flex items-center justify-center rounded-md  py-2 text-gray-400">
+                      <p className="font-semibold">빈자리</p>
+                    </div>
+                  </div>
+                );
+              }
+            })}
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col rounded-lg border p-5">
+        <div className="flex flex-1 flex-col rounded-lg border p-5 min-h-[400px]">
           <h2 className="mb-3 text-lg font-semibold">게임</h2>
+
           {room.status === "waiting" && (
-            <p className="text-sm text-gray-500">
-              아직 게임이 시작되지 않았습니다.
-            </p>
+            <div className="flex flex-1 flex-col items-center justify-center">
+              <p className="text-sm text-gray-500">
+                아직 게임이 시작되지 않았습니다.
+              </p>
+            </div>
           )}
+          {isHost && room.status === "waiting" && (
+            <button
+              onClick={() => {
+                onStartGame(room.id);
+              }}
+              className="mt-4 w-full rounded-md border px-5 py-3 hover:bg-emerald-300"
+            >
+              게임 시작
+            </button>
+          )}
+
           {room.status === "playing" && (
             <>
               <p className="text-sm text-gray-500">게임이 진행중입니다.</p>
@@ -211,16 +242,6 @@ export default function RoomScreen({
                 ))}
               </div>
             </div>
-          )}
-          {isHost && room.status === "waiting" && (
-            <button
-              onClick={() => {
-                onStartGame(room.id);
-              }}
-              className="mt-4 w-full rounded-md border px-5 py-3 hover:bg-emerald-300"
-            >
-              게임 시작
-            </button>
           )}
         </div>
       </div>
