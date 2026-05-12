@@ -205,6 +205,7 @@ export default function HomeClient() {
     roomId: string,
     playerId: string,
     choiceIndex: number,
+    timeLeft: number,
   ) => {
     setRooms((prev) =>
       prev.map((room) => {
@@ -221,7 +222,7 @@ export default function HomeClient() {
           }
           return {
             ...player,
-            score: isCorrect ? player.score + 100 : player.score,
+            score: isCorrect ? player.score + 100 + timeLeft : player.score,
             answeredQuestionIndex: room.currentQuestionIndex,
           };
         });
@@ -258,6 +259,42 @@ export default function HomeClient() {
         };
       }),
     );
+  };
+
+  const onTimeOver = (roomId: string) => {
+    setRooms((prev) => {
+      return prev.map((room) => {
+        if (room.id !== roomId) return room;
+        if (room.status !== "playing") return room;
+        const updatedPlayers = room.players.map((player) => {
+          if (player.answeredQuestionIndex === room.currentQuestionIndex) {
+            return player;
+          }
+          return {
+            ...player,
+            answeredQuestionIndex: room.currentQuestionIndex,
+          };
+        });
+        const isLastQuestion =
+          room.currentQuestionIndex >= room.quizQuestions.length - 1;
+        if (isLastQuestion) {
+          return {
+            ...room,
+            players: updatedPlayers,
+            status: "finished",
+          };
+        }
+        return {
+          ...room,
+          players: updatedPlayers.map((player) => ({
+            ...player,
+            answeredQuestionIndex: undefined,
+          })),
+          currentQuestionIndex: room.currentQuestionIndex + 1,
+          questionStartedAt: Date.now(),
+        };
+      });
+    });
   };
 
   /* 문제집 관리 함수 */
@@ -506,6 +543,7 @@ export default function HomeClient() {
                   onSendMessage={sendRoomMessage}
                   onStartGame={startRoomGame}
                   submitRoomAnswer={submitRoomAnswer}
+                  onTimeOver={onTimeOver}
                 />
               )}
             </>

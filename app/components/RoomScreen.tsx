@@ -10,10 +10,12 @@ type RoomScreenProps = {
   currentPlayerId: string;
   onSendMessage: (roomId: string, message: ChatMessage) => void;
   onStartGame: (roomId: string) => void;
+  onTimeOver: (roomId: string) => void;
   submitRoomAnswer: (
     roomId: string,
     playerId: string,
     choiceIndex: number,
+    timeLeft: number,
   ) => void;
 };
 
@@ -25,9 +27,17 @@ export default function RoomScreen({
   onSendMessage,
   onStartGame,
   submitRoomAnswer,
+  onTimeOver,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
   const [now, setNow] = useState(Date.now());
+  const remainingMs = room.questionStartedAt
+    ? room.timeLimit * 1000 - (now - room.questionStartedAt)
+    : room.timeLimit * 1000;
+
+  const rawTimeLeft = Math.ceil(remainingMs / 1000);
+
+  const timeLeft = Math.min(room.timeLimit, Math.max(rawTimeLeft, 0));
 
   useEffect(() => {
     if (room.status !== "playing") return;
@@ -39,13 +49,11 @@ export default function RoomScreen({
     return () => clearInterval(timerId);
   }, [room.status]);
 
-  const remainingMs = room.questionStartedAt
-    ? room.timeLimit * 1000 - (now - room.questionStartedAt)
-    : room.timeLimit * 1000;
-
-  const rawTimeLeft = Math.ceil(remainingMs / 1000);
-
-  const timeLeft = Math.min(room.timeLimit, Math.max(rawTimeLeft, 0));
+  useEffect(() => {
+    if (room.status !== "playing") return;
+    if (timeLeft > 0) return;
+    onTimeOver(room.id);
+  }, [timeLeft, room.status, room.id, onTimeOver]);
 
   const sendMessage = () => {
     if (!messageText.trim()) return;
@@ -140,7 +148,12 @@ export default function RoomScreen({
                 {currentQuestion.choices.map((choice, index) => (
                   <button
                     onClick={() =>
-                      submitRoomAnswer(room.id, currentPlayerId, index)
+                      submitRoomAnswer(
+                        room.id,
+                        currentPlayerId,
+                        index,
+                        timeLeft,
+                      )
                     }
                     disabled={hasAnswered}
                     key={index}
