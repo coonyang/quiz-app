@@ -203,7 +203,7 @@ export default function RoomScreen({
             <div>
               <h3 className="text-xl font-bold">최종 순위</h3>
 
-              <div className="mt-3 grid gap-2">
+              <div className="mt-3 grid max-h-[285px] gap-2 overflow-y-auto pr-2">
                 {sortedPlayers.map((player, index) => (
                   <div
                     key={player.id}
