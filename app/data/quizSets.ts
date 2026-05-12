@@ -22,7 +22,7 @@ export const quizSets = [
       {
         id: 1,
         question: "2 + 3은?",
-        choices: ["4", "5", "6", "7"],
+        choices: ["41231231231231231231231231231", "5123123123122", "6", "7"],
         answerIndex: 1,
       },
       {

@@ -137,9 +137,18 @@ export default function RoomScreen({
           {room.status === "playing" && (
             <>
               <p className="text-sm text-gray-500">게임이 진행중입니다.</p>
-              <p>남은 시간: {timeLeft}초</p>
-
-              <div>
+              <p className="mt-4 mb-4">남은 시간: {timeLeft}초</p>
+              <div className="mb-6 h-3 overflow-hidden rounded-full bg-gray-200">
+                <div
+                  className={`h-full  ${
+                    timeLeft <= 5 ? "bg-red-400" : "bg-emerald-400"
+                  }`}
+                  style={{
+                    width: `${(timeLeft / room.timeLimit) * 100}%`,
+                  }}
+                />
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3">
                 <p>
                   {room.currentQuestionIndex + 1} / {room.quizQuestions.length}
                 </p>
@@ -147,6 +156,7 @@ export default function RoomScreen({
 
                 {currentQuestion.choices.map((choice, index) => (
                   <button
+                    key={index}
                     onClick={() =>
                       submitRoomAnswer(
                         room.id,
@@ -156,8 +166,16 @@ export default function RoomScreen({
                       )
                     }
                     disabled={hasAnswered}
-                    key={index}
+                    className={`rounded-xl border px-5 py-4 text-left text-lg font-medium transition-all ${
+                      hasAnswered
+                        ? "cursor-not-allowed bg-gray-100 opacity-70"
+                        : "hover:scale-[1.01] hover:bg-emerald-100"
+                    }`}
                   >
+                    <span className="mr-3 font-bold text-emerald-600">
+                      {index + 1}.
+                    </span>
+
                     {choice}
                   </button>
                 ))}
