@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Room, ChatMessage } from "../types/quiz";
 
 type RoomScreenProps = {
@@ -36,6 +36,7 @@ export default function RoomScreen({
   const [messageText, setMessageText] = useState("");
   const [now, setNow] = useState(Date.now());
   const [countdown, setCountdown] = useState<number | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const remainingMs = room.questionStartedAt
     ? room.timeLimit * 1000 - (now - room.questionStartedAt)
     : room.timeLimit * 1000;
@@ -43,6 +44,20 @@ export default function RoomScreen({
   const rawTimeLeft = Math.ceil(remainingMs / 1000);
 
   const timeLeft = Math.min(room.timeLimit, Math.max(rawTimeLeft, 0));
+
+  useEffect(() => {
+    if (!chatContainerRef.current) return;
+
+    const container = chatContainerRef.current;
+
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
+
+    if (isNearBottom) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [room.messages]);
 
   useEffect(() => {
     if (room.status !== "playing") return;
@@ -286,7 +301,10 @@ export default function RoomScreen({
       <aside className="flex min-h-[400px] flex-col rounded-lg border p-4 lg:h-full">
         <h2 className="mb-3 text-lg font-semibold">채팅</h2>
 
-        <div className="flex-1 space-y-3 overflow-y-auto rounded-md border p-3 max-h-[300px]">
+        <div
+          ref={chatContainerRef}
+          className="flex-1 space-y-3 overflow-y-auto rounded-md border p-3 max-h-[300px]"
+        >
           {room.messages.map((message) => (
             <div key={message.id}>
               <p className="text-sm font-semibold">{message.nickname}</p>
