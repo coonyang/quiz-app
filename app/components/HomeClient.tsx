@@ -242,8 +242,8 @@ export default function HomeClient() {
         return room.id === roomId
           ? {
               ...room,
-              status: "playing",
-              questionStartedAt: Date.now(),
+              status: "countdown",
+
               messages: [...room.messages, newMessage],
             }
           : room;
@@ -311,9 +311,9 @@ export default function HomeClient() {
     );
   };
 
-  const onTimeOver = (roomId: string) => {
-    setRooms((prev) => {
-      return prev.map((room) => {
+  const onTimeOver = (roomId: string) =>
+    setRooms((prev) =>
+      prev.map((room) => {
         if (room.id !== roomId) return room;
         if (room.status !== "playing") return room;
         const updatedPlayers = room.players.map((player) => {
@@ -343,9 +343,19 @@ export default function HomeClient() {
           currentQuestionIndex: room.currentQuestionIndex + 1,
           questionStartedAt: Date.now(),
         };
-      });
-    });
-  };
+      }),
+    );
+  const onCountdownEnd = (roomId: string) =>
+    setRooms((prev) =>
+      prev.map((room) => {
+        if (room.id !== roomId) return room;
+        return {
+          ...room,
+          status: "playing",
+          questionStartedAt: Date.now(),
+        };
+      }),
+    );
 
   /* 문제집 관리 함수 */
   const handleSelectCategory = (category: string) => {
@@ -596,6 +606,7 @@ export default function HomeClient() {
                   onStartGame={startRoomGame}
                   submitRoomAnswer={submitRoomAnswer}
                   onTimeOver={onTimeOver}
+                  onCountdownEnd={onCountdownEnd}
                 />
               )}
             </>

@@ -11,6 +11,7 @@ type RoomScreenProps = {
   onSendMessage: (roomId: string, message: ChatMessage) => void;
   onStartGame: (roomId: string) => void;
   onTimeOver: (roomId: string) => void;
+  onCountdownEnd: (roomId: string) => void;
   submitRoomAnswer: (
     roomId: string,
     playerId: string,
@@ -28,9 +29,11 @@ export default function RoomScreen({
   onStartGame,
   submitRoomAnswer,
   onTimeOver,
+  onCountdownEnd,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
   const [now, setNow] = useState(Date.now());
+  const [countdown, setCountdown] = useState(3);
   const remainingMs = room.questionStartedAt
     ? room.timeLimit * 1000 - (now - room.questionStartedAt)
     : room.timeLimit * 1000;
@@ -54,6 +57,21 @@ export default function RoomScreen({
     if (timeLeft > 0) return;
     onTimeOver(room.id);
   }, [timeLeft, room.status, room.id, onTimeOver]);
+
+  useEffect(() => {
+    if (room.status !== "countdown") return;
+    setCountdown(3);
+    const timerId = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          onCountdownEnd(room.id);
+          return (prev = 0);
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timerId);
+  }, [room.status]);
 
   const sendMessage = () => {
     if (!messageText.trim()) return;
@@ -168,7 +186,11 @@ export default function RoomScreen({
               게임 시작
             </button>
           )}
-
+          {room.status === "countdown" && (
+            <div className="flex flex-1 flex-col items-center justify-center">
+              {countdown}
+            </div>
+          )}
           {room.status === "playing" && (
             <>
               <p className="text-sm text-gray-500">게임이 진행중입니다.</p>
