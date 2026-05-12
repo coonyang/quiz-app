@@ -454,29 +454,31 @@ export default function HomeClient() {
         <section className="min-w-0">
           {!isStarted && !isFinished && (
             <>
-              <div className="mx-auto mb-4 flex max-w-xl gap-2">
-                <button
-                  onClick={() => setPlayMode("solo")}
-                  className={`flex-1 rounded-md border px-4 py-2 ${
-                    playMode === "solo"
-                      ? "bg-black text-white"
-                      : "bg-white text-black"
-                  }`}
-                >
-                  혼자 풀기
-                </button>
+              {!enteredRoomId && (
+                <div className="mx-auto mb-4 flex max-w-xl gap-2">
+                  <button
+                    onClick={() => setPlayMode("solo")}
+                    className={`flex-1 rounded-md border px-4 py-2 ${
+                      playMode === "solo"
+                        ? "bg-black text-white"
+                        : "bg-white text-black"
+                    }`}
+                  >
+                    혼자 풀기
+                  </button>
 
-                <button
-                  onClick={() => setPlayMode("online")}
-                  className={`flex-1 rounded-md border px-4 py-2 ${
-                    playMode === "online"
-                      ? "bg-black text-white"
-                      : "bg-white text-black"
-                  }`}
-                >
-                  온라인 방
-                </button>
-              </div>
+                  <button
+                    onClick={() => setPlayMode("online")}
+                    className={`flex-1 rounded-md border px-4 py-2 ${
+                      playMode === "online"
+                        ? "bg-black text-white"
+                        : "bg-white text-black"
+                    }`}
+                  >
+                    온라인 방
+                  </button>
+                </div>
+              )}
 
               {playMode === "solo" && (
                 <>
