@@ -81,8 +81,8 @@ export default function RoomScreen({
   const sortedPlayers = [...room.players].sort((a, b) => b.score - a.score);
 
   return (
-    <section className="mx-auto grid max-w-6xl gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="flex flex-col gap-4">
+    <section className="mx-auto grid min-h-[80vh] max-w-6xl  gap-4 lg:grid-cols-[70%_30%]">
+      <div className="flex flex-col gap-4 h-full">
         <div className="rounded-lg border p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -102,7 +102,7 @@ export default function RoomScreen({
           </div>
         </div>
 
-        <div className="rounded-lg border p-5">
+        <div className="flex flex-1 flex-col rounded-lg border p-5">
           <h2 className="mb-3 text-lg font-semibold">참가자</h2>
 
           <div className="grid gap-2">
@@ -130,7 +130,7 @@ export default function RoomScreen({
           </div>
         </div>
 
-        <div className="rounded-lg border p-5">
+        <div className="flex flex-1 flex-col rounded-lg border p-5">
           <h2 className="mb-3 text-lg font-semibold">게임</h2>
           {room.status === "waiting" && (
             <p className="text-sm text-gray-500">
@@ -224,7 +224,7 @@ export default function RoomScreen({
         </div>
       </div>
 
-      <aside className="flex min-h-[520px] flex-col rounded-lg border p-4">
+      <aside className="flex min-h-[400px] flex-col rounded-lg border p-4 lg:h-full">
         <h2 className="mb-3 text-lg font-semibold">채팅</h2>
 
         <div className="flex-1 space-y-3 overflow-y-auto rounded-md border p-3">

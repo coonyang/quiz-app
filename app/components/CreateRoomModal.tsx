@@ -10,6 +10,7 @@ type CreateRoomModalProps = {
   onClose: () => void;
   onCreateRoom: (room: Room) => void;
 };
+
 export default function CreateRoomModal({
   nickname,
   currentPlayerId,
@@ -114,9 +115,8 @@ export default function CreateRoomModal({
             className="rounded-md border px-4 py-2"
           >
             <option value={2}>2명</option>
+            <option value={3}>3명</option>
             <option value={4}>4명</option>
-            <option value={6}>6명</option>
-            <option value={8}>8명</option>
           </select>
 
           <button
