@@ -187,7 +187,7 @@ export default function RoomScreen({
                 <p>
                   {room.currentQuestionIndex + 1} / {room.quizQuestions.length}
                 </p>
-                <h2 className="text-3xl font-bold text-center">
+                <h2 className="break-all text-3xl font-bold text-center">
                   {currentQuestion.question}
                 </h2>
               </div>
@@ -204,7 +204,7 @@ export default function RoomScreen({
                       )
                     }
                     disabled={hasAnswered}
-                    className={`rounded-xl border px-5 py-4 text-left text-lg font-medium transition-all ${
+                    className={`min-h-[50px] overflow-y-auto rounded-xl border px-5 py-4 text-left text-lg font-medium transition-all ${
                       hasAnswered
                         ? "cursor-not-allowed bg-gray-100 opacity-70"
                         : "hover:scale-[1.01] hover:bg-emerald-100"
