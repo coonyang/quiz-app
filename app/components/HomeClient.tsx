@@ -128,7 +128,10 @@ export default function HomeClient() {
     setRooms((prev) =>
       prev.map((room) => {
         if (room.id !== roomId) return room;
-
+        if (room.status !== "waiting") {
+          alert("게임이 시작된 방입니다.");
+          return room;
+        }
         const alreadyJoined = room.players.some(
           (player) => player.id === currentPlayerId,
         );
@@ -160,16 +163,23 @@ export default function HomeClient() {
 
     setRooms((prev) =>
       prev
-        .map((room) =>
-          room.id === enteredRoomId
+        .map((room) => {
+          const leavingPlayer = room.players.find(
+            (player) => player.id == currentPlayerId,
+          );
+          const nextPlayers = room.players.filter(
+            (player) => player.id !== currentPlayerId,
+          );
+          if (leavingPlayer?.isHost === true && nextPlayers.length > 0) {
+            nextPlayers[0].isHost = true;
+          }
+          return room.id === enteredRoomId
             ? {
                 ...room,
-                players: room.players.filter(
-                  (player) => player.id !== currentPlayerId,
-                ),
+                players: nextPlayers,
               }
-            : room,
-        )
+            : room;
+        })
         .filter((room) => room.players.length > 0),
     );
 
