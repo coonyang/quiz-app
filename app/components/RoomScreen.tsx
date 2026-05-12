@@ -15,7 +15,6 @@ type RoomScreenProps = {
     playerId: string,
     choiceIndex: number,
   ) => void;
-  goNextRoomQuestion: (roomId: string) => void;
 };
 
 export default function RoomScreen({
@@ -26,7 +25,6 @@ export default function RoomScreen({
   onSendMessage,
   onStartGame,
   submitRoomAnswer,
-  goNextRoomQuestion,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
   const sendMessage = () => {

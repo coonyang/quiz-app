@@ -257,31 +257,6 @@ export default function HomeClient() {
     );
   };
 
-  const goNextRoomQuestion = (roomId: string) => {
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
-        const isLastQuestion =
-          room.currentQuestionIndex >= room.quizQuestions.length - 1;
-        if (isLastQuestion) {
-          return {
-            ...room,
-            status: "finished",
-          };
-        }
-
-        return {
-          ...room,
-          currentQuestionIndex: room.currentQuestionIndex + 1,
-          players: room.players.map((player) => ({
-            ...player,
-            answeredQuestionIndex: undefined,
-          })),
-        };
-      }),
-    );
-  };
-
   /* 문제집 관리 함수 */
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
@@ -528,7 +503,6 @@ export default function HomeClient() {
                   onSendMessage={sendRoomMessage}
                   onStartGame={startRoomGame}
                   submitRoomAnswer={submitRoomAnswer}
-                  goNextRoomQuestion={goNextRoomQuestion}
                 />
               )}
             </>
