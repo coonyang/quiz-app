@@ -60,18 +60,22 @@ export default function RoomScreen({
 
   useEffect(() => {
     if (room.status !== "countdown") return;
+
     setCountdown(3);
+
     const timerId = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          onCountdownEnd(room.id);
-          return (prev = 0);
-        }
-        return prev - 1;
-      });
+      setCountdown((prev) => prev - 1);
     }, 1000);
+
     return () => clearInterval(timerId);
   }, [room.status]);
+  useEffect(() => {
+    if (room.status !== "countdown") return;
+
+    if (countdown <= 0) {
+      onCountdownEnd(room.id);
+    }
+  }, [countdown, room.status]);
 
   const sendMessage = () => {
     if (!messageText.trim()) return;
