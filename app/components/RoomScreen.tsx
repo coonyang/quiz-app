@@ -128,14 +128,6 @@ export default function RoomScreen({
                     {choice}
                   </button>
                 ))}
-                {isHost && hasAnswered && (
-                  <button
-                    onClick={() => goNextRoomQuestion(room.id)}
-                    className="mt-4 rounded-md border px-4 py-2 hover:bg-gray-100"
-                  >
-                    다음 문제
-                  </button>
-                )}
               </div>
             </>
           )}

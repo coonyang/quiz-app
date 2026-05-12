@@ -210,21 +210,48 @@ export default function HomeClient() {
         const currentQuestion = room.quizQuestions[room.currentQuestionIndex];
         const isCorrect = choiceIndex === currentQuestion.answerIndex;
 
+        const updatedPlayers = room.players.map((player) => {
+          if (player.id !== playerId) {
+            return player;
+          }
+          if (player.answeredQuestionIndex === room.currentQuestionIndex) {
+            return player;
+          }
+          return {
+            ...player,
+            score: isCorrect ? player.score + 100 : player.score,
+            answeredQuestionIndex: room.currentQuestionIndex,
+          };
+        });
+        const allAnswered = updatedPlayers.every(
+          (player) =>
+            player.answeredQuestionIndex === room.currentQuestionIndex,
+        );
+        const isLastQuestion =
+          room.currentQuestionIndex >= room.quizQuestions.length - 1;
+
+        if (allAnswered && isLastQuestion) {
+          return {
+            ...room,
+            players: updatedPlayers,
+            status: "finished",
+          };
+        }
+
+        if (allAnswered) {
+          return {
+            ...room,
+            players: updatedPlayers.map((player) => ({
+              ...player,
+              answeredQuestionIndex: undefined,
+            })),
+            currentQuestionIndex: room.currentQuestionIndex + 1,
+          };
+        }
+
         return {
           ...room,
-          players: room.players.map((player) => {
-            if (player.id !== playerId) {
-              return player;
-            }
-            if (player.answeredQuestionIndex === room.currentQuestionIndex) {
-              return player;
-            }
-            return {
-              ...player,
-              score: isCorrect ? player.score + 100 : player.score,
-              answeredQuestionIndex: room.currentQuestionIndex,
-            };
-          }),
+          players: updatedPlayers,
         };
       }),
     );
