@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Room, ChatMessage } from "../types/quiz";
 
 type RoomScreenProps = {
@@ -27,6 +27,26 @@ export default function RoomScreen({
   submitRoomAnswer,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    if (room.status !== "playing") return;
+    setNow(Date.now());
+    const timerId = setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [room.status]);
+
+  const remainingMs = room.questionStartedAt
+    ? room.timeLimit * 1000 - (now - room.questionStartedAt)
+    : room.timeLimit * 1000;
+
+  const rawTimeLeft = Math.ceil(remainingMs / 1000);
+
+  const timeLeft = Math.min(room.timeLimit, Math.max(rawTimeLeft, 0));
+
   const sendMessage = () => {
     if (!messageText.trim()) return;
 
@@ -109,6 +129,8 @@ export default function RoomScreen({
           {room.status === "playing" && (
             <>
               <p className="text-sm text-gray-500">게임이 진행중입니다.</p>
+              <p>남은 시간: {timeLeft}초</p>
+
               <div>
                 <p>
                   {room.currentQuestionIndex + 1} / {room.quizQuestions.length}

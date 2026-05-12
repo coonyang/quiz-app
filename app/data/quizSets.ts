@@ -25,6 +25,18 @@ export const quizSets = [
         choices: ["4", "5", "6", "7"],
         answerIndex: 1,
       },
+      {
+        id: 2,
+        question: "2 + 3은?",
+        choices: ["4", "5", "6", "7"],
+        answerIndex: 1,
+      },
+      {
+        id: 3,
+        question: "2 + 3은?",
+        choices: ["4", "5", "6", "7"],
+        answerIndex: 1,
+      },
     ],
   },
 ];

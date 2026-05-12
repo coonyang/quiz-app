@@ -194,7 +194,9 @@ export default function HomeClient() {
   const startRoomGame = (roomId: string) => {
     setRooms((prev) =>
       prev.map((room) =>
-        room.id === roomId ? { ...room, status: "playing" } : room,
+        room.id === roomId
+          ? { ...room, status: "playing", questionStartedAt: Date.now() }
+          : room,
       ),
     );
   };
@@ -241,6 +243,7 @@ export default function HomeClient() {
         if (allAnswered) {
           return {
             ...room,
+            questionStartedAt: Date.now(),
             players: updatedPlayers.map((player) => ({
               ...player,
               answeredQuestionIndex: undefined,
