@@ -311,7 +311,7 @@ export default function HomeClient() {
     );
   };
 
-  const onTimeOver = (roomId: string) =>
+  const timeOver = (roomId: string) =>
     setRooms((prev) =>
       prev.map((room) => {
         if (room.id !== roomId) return room;
@@ -345,7 +345,8 @@ export default function HomeClient() {
         };
       }),
     );
-  const onCountdownEnd = (roomId: string) =>
+
+  const countdownEnd = (roomId: string) =>
     setRooms((prev) =>
       prev.map((room) => {
         if (room.id !== roomId) return room;
@@ -356,6 +357,27 @@ export default function HomeClient() {
         };
       }),
     );
+
+  const restartRoomGame = (roomId: string) => {
+    setRooms((prev) =>
+      prev.map((room) => {
+        if (room.id !== roomId) return room;
+        return {
+          ...room,
+          status: "waiting",
+          currentQuestionIndex: 0,
+          questionStartedAt: null,
+          players: room.players.map((player) => {
+            return {
+              ...player,
+              score: 0,
+              answeredQuestionIndex: undefined,
+            };
+          }),
+        };
+      }),
+    );
+  };
 
   /* 문제집 관리 함수 */
   const handleSelectCategory = (category: string) => {
@@ -598,6 +620,7 @@ export default function HomeClient() {
 
               {playMode === "online" && enteredRoom && (
                 <RoomScreen
+                  key={`${enteredRoom.id}-${enteredRoom.status}`}
                   room={enteredRoom}
                   nickname={nickname}
                   onLeaveRoom={leaveRoom}
@@ -605,8 +628,9 @@ export default function HomeClient() {
                   onSendMessage={sendRoomMessage}
                   onStartGame={startRoomGame}
                   submitRoomAnswer={submitRoomAnswer}
-                  onTimeOver={onTimeOver}
-                  onCountdownEnd={onCountdownEnd}
+                  onTimeOver={timeOver}
+                  onCountdownEnd={countdownEnd}
+                  onRestartRoomGame={restartRoomGame}
                 />
               )}
             </>

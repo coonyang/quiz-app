@@ -12,6 +12,7 @@ type RoomScreenProps = {
   onStartGame: (roomId: string) => void;
   onTimeOver: (roomId: string) => void;
   onCountdownEnd: (roomId: string) => void;
+  onRestartRoomGame: (roomId: string) => void;
   submitRoomAnswer: (
     roomId: string,
     playerId: string,
@@ -30,10 +31,11 @@ export default function RoomScreen({
   submitRoomAnswer,
   onTimeOver,
   onCountdownEnd,
+  onRestartRoomGame,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
   const [now, setNow] = useState(Date.now());
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState<number | null>(null);
   const remainingMs = room.questionStartedAt
     ? room.timeLimit * 1000 - (now - room.questionStartedAt)
     : room.timeLimit * 1000;
@@ -64,15 +66,19 @@ export default function RoomScreen({
     setCountdown(3);
 
     const timerId = setInterval(() => {
-      setCountdown((prev) => prev - 1);
+      setCountdown((prev) => {
+        if (prev === null) return 3;
+        return prev - 1;
+      });
     }, 1000);
 
     return () => clearInterval(timerId);
   }, [room.status]);
+
   useEffect(() => {
     if (room.status !== "countdown") return;
 
-    if (countdown <= 0) {
+    if (countdown !== null && countdown <= 0) {
       onCountdownEnd(room.id);
     }
   }, [countdown, room.status]);
@@ -201,8 +207,12 @@ export default function RoomScreen({
           )}
           {room.status === "finished" && (
             <div>
-              <h3 className="text-xl font-bold">최종 순위</h3>
-
+              <div className="flex justify-between">
+                <h3 className="text-xl font-bold">최종 순위</h3>
+                <button onClick={() => onRestartRoomGame(room.id)}>
+                  다시하기
+                </button>
+              </div>
               <div className="mt-3 grid max-h-[285px] gap-2 overflow-y-auto pr-2">
                 {sortedPlayers.map((player, index) => (
                   <div
@@ -276,7 +286,7 @@ export default function RoomScreen({
       <aside className="flex min-h-[400px] flex-col rounded-lg border p-4 lg:h-full">
         <h2 className="mb-3 text-lg font-semibold">채팅</h2>
 
-        <div className="flex-1 space-y-3 overflow-y-auto rounded-md border p-3">
+        <div className="flex-1 space-y-3 overflow-y-auto rounded-md border p-3 max-h-[300px]">
           {room.messages.map((message) => (
             <div key={message.id}>
               <p className="text-sm font-semibold">{message.nickname}</p>
