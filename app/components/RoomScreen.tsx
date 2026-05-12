@@ -115,7 +115,8 @@ export default function RoomScreen({
                   <p className="font-semibold">
                     {player.nickname}
                     {player.id === currentPlayerId ? " (나)" : ""}
-                    {player.answeredQuestionIndex == room.currentQuestionIndex
+                    {player.answeredQuestionIndex ==
+                      room.currentQuestionIndex && room.status == "playing"
                       ? "✅"
                       : ""}
                   </p>
