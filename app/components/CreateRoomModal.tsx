@@ -120,6 +120,8 @@ export default function CreateRoomModal({
             <option value={2}>2명</option>
             <option value={3}>3명</option>
             <option value={4}>4명</option>
+            <option value={5}>5명</option>
+            <option value={6}>6명</option>
           </select>
 
           <button

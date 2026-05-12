@@ -99,7 +99,7 @@ export default function RoomScreen({
   const sortedPlayers = [...room.players].sort((a, b) => b.score - a.score);
 
   return (
-    <section className="mx-auto grid min-h-[80vh] max-w-6xl  gap-4 lg:grid-cols-[70%_30%]">
+    <section className="mx-auto grid min-h-[80vh] max-w-6xl  gap-4 grid-cols-[70%_30%]">
       <div className="flex flex-col gap-4 h-full">
         <div className="rounded-lg border p-5">
           <div className="flex items-center justify-between gap-3">
@@ -119,54 +119,7 @@ export default function RoomScreen({
             </button>
           </div>
         </div>
-
-        <div className="flex flex-1 flex-col rounded-lg border p-5">
-          <h2 className="mb-3 text-lg font-semibold">참가자</h2>
-
-          <div className="grid gap-2">
-            {Array.from({ length: room.maxPlayers }).map((_, index) => {
-              const player = room.players[index];
-              if (player) {
-                return (
-                  <div
-                    key={player.id}
-                    className="flex items-center justify-between rounded-md border px-4 py-3"
-                  >
-                    <div>
-                      <p className="font-semibold">
-                        {player.nickname}
-                        {player.id === currentPlayerId ? " (나)" : ""}
-                        {player.answeredQuestionIndex ==
-                          room.currentQuestionIndex && room.status == "playing"
-                          ? "✅"
-                          : ""}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {player.isHost ? "방장" : "참가자"}
-                      </p>
-                    </div>
-
-                    <p className="font-semibold">{player.score}점</p>
-                  </div>
-                );
-              }
-              if (!player) {
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between rounded-md border px-4 py-3"
-                  >
-                    <div className="flex items-center justify-center rounded-md  py-2 text-gray-400">
-                      <p className="font-semibold">빈자리</p>
-                    </div>
-                  </div>
-                );
-              }
-            })}
-          </div>
-        </div>
-
-        <div className="flex flex-1 flex-col rounded-lg border p-5 min-h-[400px]">
+        <div className="flex flex-1 flex-col rounded-lg border p-5 min-h-[410px]">
           <h2 className="mb-3 text-lg font-semibold">게임</h2>
 
           {room.status === "waiting" && (
@@ -205,12 +158,15 @@ export default function RoomScreen({
                   }}
                 />
               </div>
-              <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className=" flex flex-col ">
                 <p>
                   {room.currentQuestionIndex + 1} / {room.quizQuestions.length}
                 </p>
-                <h2>{currentQuestion.question}</h2>
-
+                <h2 className="text-3xl font-bold text-center">
+                  {currentQuestion.question}
+                </h2>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3">
                 {currentQuestion.choices.map((choice, index) => (
                   <button
                     key={index}
@@ -265,6 +221,51 @@ export default function RoomScreen({
               </div>
             </div>
           )}
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col rounded-lg border p-5">
+        <h2 className="mb-3 text-lg font-semibold">참가자</h2>
+
+        <div className="grid gap-2">
+          {Array.from({ length: room.maxPlayers }).map((_, index) => {
+            const player = room.players[index];
+            if (player) {
+              return (
+                <div
+                  key={player.id}
+                  className="flex items-center justify-between rounded-md border px-4 py-3"
+                >
+                  <div className="min-w-[100px]">
+                    <p className="font-semibold">
+                      {player.nickname}
+                      {player.id === currentPlayerId ? " (나)" : ""}
+                      {player.answeredQuestionIndex ==
+                        room.currentQuestionIndex && room.status == "playing"
+                        ? "✅"
+                        : ""}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {player.isHost ? "방장" : "참가자"}
+                    </p>
+                  </div>
+
+                  <p className="font-semibold">{player.score}점</p>
+                </div>
+              );
+            }
+            if (!player) {
+              return (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-md border px-4 py-3"
+                >
+                  <div className="flex items-center justify-center rounded-md  py-2 text-gray-400">
+                    <p className="font-semibold">빈자리</p>
+                  </div>
+                </div>
+              );
+            }
+          })}
         </div>
       </div>
 
