@@ -124,6 +124,13 @@ export default function HomeClient() {
 
   const enterRoom = (roomId: string) => {
     const playerNickname = nickname.trim() || "익명";
+    const newMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      nickname: "시스템",
+      message: `${playerNickname}님이 입장했습니다`,
+      createdAt: new Date().toISOString(),
+      playerId: "system",
+    };
 
     setRooms((prev) =>
       prev.map((room) => {
@@ -142,6 +149,7 @@ export default function HomeClient() {
 
         return {
           ...room,
+          messages: [...room.messages, newMessage],
           players: [
             ...room.players,
             {
@@ -164,19 +172,37 @@ export default function HomeClient() {
     setRooms((prev) =>
       prev
         .map((room) => {
+          if (room.id !== enteredRoomId) return room;
           const leavingPlayer = room.players.find(
             (player) => player.id == currentPlayerId,
           );
           const nextPlayers = room.players.filter(
             (player) => player.id !== currentPlayerId,
           );
+          const newMessage: ChatMessage = {
+            id: crypto.randomUUID(),
+            nickname: "시스템",
+            message: `${leavingPlayer?.nickname}님이 퇴장했습니다`,
+            createdAt: new Date().toISOString(),
+            playerId: "system",
+          };
+          const nextMessages = [...room.messages, newMessage];
           if (leavingPlayer?.isHost === true && nextPlayers.length > 0) {
             nextPlayers[0].isHost = true;
+            const newMessage2: ChatMessage = {
+              id: crypto.randomUUID(),
+              nickname: "시스템",
+              message: `${nextPlayers[0].nickname}님이 방장이 되었습니다.`,
+              createdAt: new Date().toISOString(),
+              playerId: "system",
+            };
+            nextMessages.push(newMessage2);
           }
           return room.id === enteredRoomId
             ? {
                 ...room,
                 players: nextPlayers,
+                messages: nextMessages,
               }
             : room;
         })
@@ -203,11 +229,25 @@ export default function HomeClient() {
 
   const startRoomGame = (roomId: string) => {
     setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId
-          ? { ...room, status: "playing", questionStartedAt: Date.now() }
-          : room,
-      ),
+      prev.map((room) => {
+        if (room.id !== roomId) return room;
+        const newMessage: ChatMessage = {
+          id: crypto.randomUUID(),
+          nickname: "시스템",
+          message: "게임이 시작되었습니다.",
+          createdAt: new Date().toISOString(),
+          playerId: "system",
+        };
+
+        return room.id === roomId
+          ? {
+              ...room,
+              status: "playing",
+              questionStartedAt: Date.now(),
+              messages: [...room.messages, newMessage],
+            }
+          : room;
+      }),
     );
   };
 
