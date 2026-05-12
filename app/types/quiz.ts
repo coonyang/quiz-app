@@ -31,7 +31,7 @@ export type Player = {
   nickname: string;
   isHost: boolean;
   score: number;
-  answeredQuestionIndex?: number;
+  answeredQuestionIndex?: number | undefined;
 };
 
 export type Room = {
