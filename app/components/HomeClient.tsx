@@ -13,7 +13,7 @@ import type { RankingRecord, Question, QuizSet } from "../types/quiz";
 
 import { useRoomGame } from "../hooks/useRoomGame";
 import { useSoloQuiz } from "../hooks/useSoloQuiz";
-
+import { socket } from "../lib/socket/socket";
 export default function HomeClient() {
   const TIME_LIMIT = 30;
 
@@ -167,6 +167,16 @@ export default function HomeClient() {
 
     setRankings,
   });
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("연결됨");
+    });
+
+    return () => {
+      socket.off("connect");
+    };
+  }, []);
 
   return (
     <main className="min-h-screen px-4 py-4">
