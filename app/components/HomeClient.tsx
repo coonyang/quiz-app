@@ -19,6 +19,7 @@ import type {
 import { updateSubmitRoomAnswer } from "../lib/room/updateSubmitRoomAnswer";
 import { updateTimeOver } from "../lib/room/updateTimeOver";
 import { updateEnterRoom } from "../lib/room/updateEnterRoom";
+import { updateRoomAfterLeave } from "../lib/room/updateLeaveRoom";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
@@ -145,11 +146,10 @@ export default function HomeClient() {
 
   const enterRoom = (roomId: string) => {
     setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId
-          ? updateEnterRoom(room, currentPlayerId, nickname)
-          : room,
-      ),
+      prev.map((room) => {
+        if (room.id === roomId) return room;
+        return updateEnterRoom(room, currentPlayerId, nickname);
+      }),
     );
 
     setEnteredRoomId(roomId);
@@ -160,41 +160,11 @@ export default function HomeClient() {
 
     setRooms((prev) =>
       prev
-        .map((room) => {
-          if (room.id !== enteredRoomId) return room;
-          const leavingPlayer = room.players.find(
-            (player) => player.id == currentPlayerId,
-          );
-          const nextPlayers = room.players.filter(
-            (player) => player.id !== currentPlayerId,
-          );
-          const newMessage: ChatMessage = {
-            id: crypto.randomUUID(),
-            nickname: "시스템",
-            message: `${leavingPlayer?.nickname}님이 퇴장했습니다`,
-            createdAt: new Date().toISOString(),
-            playerId: "system",
-          };
-          const nextMessages = [...room.messages, newMessage];
-          if (leavingPlayer?.isHost === true && nextPlayers.length > 0) {
-            nextPlayers[0].isHost = true;
-            const newMessage2: ChatMessage = {
-              id: crypto.randomUUID(),
-              nickname: "시스템",
-              message: `${nextPlayers[0].nickname}님이 방장이 되었습니다.`,
-              createdAt: new Date().toISOString(),
-              playerId: "system",
-            };
-            nextMessages.push(newMessage2);
-          }
-          return room.id === enteredRoomId
-            ? {
-                ...room,
-                players: nextPlayers,
-                messages: nextMessages,
-              }
-            : room;
-        })
+        .map((room) =>
+          room.id === enteredRoomId
+            ? updateRoomAfterLeave(room, currentPlayerId)
+            : room,
+        )
         .filter((room) => room.players.length > 0),
     );
 
