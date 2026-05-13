@@ -116,6 +116,24 @@ export default function HomeClient() {
   }, [isFinished, finishTime]);
 
   /* 온라인 방 관련 함수 */
+  const updateRoomQuizSet = (roomId: string, quizSetId: string) => {
+    const selectedQuizSet = allQuizSets.find((quiz) => quiz.id === quizSetId);
+    if (!selectedQuizSet) return;
+
+    setRooms((prev) =>
+      prev.map((room) => {
+        if (room.id !== roomId) return room;
+
+        return {
+          ...room,
+          quizSetId: selectedQuizSet.id,
+          quizSetTitle: selectedQuizSet.title,
+          quizQuestions: selectedQuizSet.questions,
+        };
+      }),
+    );
+  };
+
   const createRoom = (room: Room) => {
     setRooms((prev) => [room, ...prev]);
     setIsCreateRoomModalOpen(false);
@@ -631,6 +649,8 @@ export default function HomeClient() {
                   onTimeOver={timeOver}
                   onCountdownEnd={countdownEnd}
                   onRestartRoomGame={restartRoomGame}
+                  quizSets={allQuizSets}
+                  onUpdateRoomQuizSet={updateRoomQuizSet}
                 />
               )}
             </>

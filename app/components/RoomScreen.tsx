@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Room, ChatMessage } from "../types/quiz";
+import type { Room, ChatMessage, QuizSet } from "../types/quiz";
 
 type RoomScreenProps = {
   room: Room;
@@ -13,6 +13,8 @@ type RoomScreenProps = {
   onTimeOver: (roomId: string) => void;
   onCountdownEnd: (roomId: string) => void;
   onRestartRoomGame: (roomId: string) => void;
+  quizSets: QuizSet[];
+  onUpdateRoomQuizSet: (roomId: string, quizSetId: string) => void;
   submitRoomAnswer: (
     roomId: string,
     playerId: string,
@@ -24,6 +26,7 @@ type RoomScreenProps = {
 export default function RoomScreen({
   room,
   nickname,
+  quizSets,
   onLeaveRoom,
   currentPlayerId,
   onSendMessage,
@@ -32,6 +35,7 @@ export default function RoomScreen({
   onTimeOver,
   onCountdownEnd,
   onRestartRoomGame,
+  onUpdateRoomQuizSet,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
   const [now, setNow] = useState(Date.now());
@@ -132,7 +136,22 @@ export default function RoomScreen({
               <p className="text-sm text-gray-500">room id:{room.id}</p>
               <h1 className="text-2xl font-bold">{room.title}</h1>
               <p className="mt-1 text-sm text-gray-500">
-                문제집: {room.quizSetTitle}
+                {isHost && room.status === "waiting" ? (
+                  <select
+                    value={room.quizSetId}
+                    onChange={(e) => {
+                      onUpdateRoomQuizSet(room.id, e.target.value);
+                    }}
+                  >
+                    {quizSets.map((quizSet) => (
+                      <option key={quizSet.id} value={quizSet.id}>
+                        {quizSet.title} · {quizSet.category}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  `문제집: ${room.quizSetTitle}`
+                )}
               </p>
             </div>
 
