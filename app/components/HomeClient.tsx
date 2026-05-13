@@ -21,6 +21,7 @@ import { updateTimeOver } from "../lib/room/updateTimeOver";
 import { updateEnterRoom } from "../lib/room/updateEnterRoom";
 import { updateRoomAfterLeave } from "../lib/room/updateLeaveRoom";
 import { updateRoomAfterNextQuestion } from "../lib/room/updateNextQuestion";
+import { updateStartRoomGame } from "../lib/room/updateStartRoomGame";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
@@ -189,25 +190,9 @@ export default function HomeClient() {
 
   const startRoomGame = (roomId: string) => {
     setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
-        const newMessage: ChatMessage = {
-          id: crypto.randomUUID(),
-          nickname: "시스템",
-          message: "게임이 시작되었습니다.",
-          createdAt: new Date().toISOString(),
-          playerId: "system",
-        };
-
-        return room.id === roomId
-          ? {
-              ...room,
-              status: "countdown",
-
-              messages: [...room.messages, newMessage],
-            }
-          : room;
-      }),
+      prev.map((room) =>
+        room.id === roomId ? updateStartRoomGame(room) : room,
+      ),
     );
   };
 
