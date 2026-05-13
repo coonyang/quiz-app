@@ -20,6 +20,7 @@ import { updateSubmitRoomAnswer } from "../lib/room/updateSubmitRoomAnswer";
 import { updateTimeOver } from "../lib/room/updateTimeOver";
 import { updateEnterRoom } from "../lib/room/updateEnterRoom";
 import { updateRoomAfterLeave } from "../lib/room/updateLeaveRoom";
+import { updateRoomAfterNextQuestion } from "../lib/room/updateNextQuestion";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
@@ -267,14 +268,9 @@ export default function HomeClient() {
 
   const nextQuestion = (roomId: string) => {
     setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
-        return {
-          ...room,
-          status: "playing",
-          currentQuestionIndex: room.currentQuestionIndex + 1,
-        };
-      }),
+      prev.map((room) =>
+        room.id === roomId ? updateRoomAfterNextQuestion(room) : room,
+      ),
     );
   };
   /* 문제집 관리 함수 */
