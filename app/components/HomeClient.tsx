@@ -17,6 +17,7 @@ import type {
   ChatMessage,
 } from "../types/quiz";
 import { handleSubmitRoomAnswer } from "../lib/room/handleSubmitRoomAnswer";
+import { handleTimeOver } from "../lib/room/handleTimeOver";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
@@ -287,34 +288,7 @@ export default function HomeClient() {
     setRooms((prev) =>
       prev.map((room) => {
         if (room.id !== roomId) return room;
-        if (room.status !== "playing") return room;
-        const updatedPlayers = room.players.map((player) => {
-          if (player.answeredQuestionIndex === room.currentQuestionIndex) {
-            return player;
-          }
-          return {
-            ...player,
-            answeredQuestionIndex: room.currentQuestionIndex,
-          };
-        });
-        const isLastQuestion =
-          room.currentQuestionIndex >= room.quizQuestions.length - 1;
-        if (isLastQuestion) {
-          return {
-            ...room,
-            players: updatedPlayers,
-            status: "finished",
-          };
-        }
-        return {
-          ...room,
-          players: updatedPlayers.map((player) => ({
-            ...player,
-            answeredQuestionIndex: undefined,
-          })),
-          currentQuestionIndex: room.currentQuestionIndex + 1,
-          questionStartedAt: Date.now(),
-        };
+        return handleTimeOver(room);
       }),
     );
 
