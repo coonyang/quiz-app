@@ -18,6 +18,7 @@ import type {
 } from "../types/quiz";
 import { updateSubmitRoomAnswer } from "../lib/room/updateSubmitRoomAnswer";
 import { updateTimeOver } from "../lib/room/updateTimeOver";
+import { updateEnterRoom } from "../lib/room/updateEnterRoom";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
@@ -143,43 +144,12 @@ export default function HomeClient() {
   };
 
   const enterRoom = (roomId: string) => {
-    const playerNickname = nickname.trim() || "익명";
-    const newMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      nickname: "시스템",
-      message: `${playerNickname}님이 입장했습니다`,
-      createdAt: new Date().toISOString(),
-      playerId: "system",
-    };
-
     setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
-        if (room.status !== "waiting") {
-          return room;
-        }
-        const alreadyJoined = room.players.some(
-          (player) => player.id === currentPlayerId,
-        );
-
-        if (alreadyJoined) return room;
-
-        if (room.players.length >= room.maxPlayers) return room;
-
-        return {
-          ...room,
-          messages: [...room.messages, newMessage],
-          players: [
-            ...room.players,
-            {
-              id: currentPlayerId,
-              nickname: playerNickname,
-              isHost: false,
-              score: 0,
-            },
-          ],
-        };
-      }),
+      prev.map((room) =>
+        room.id === roomId
+          ? updateEnterRoom(room, currentPlayerId, nickname)
+          : room,
+      ),
     );
 
     setEnteredRoomId(roomId);
