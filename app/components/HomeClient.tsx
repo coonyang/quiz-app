@@ -16,14 +16,16 @@ import type {
   Room,
   ChatMessage,
 } from "../types/quiz";
-import { updateSubmitRoomAnswer } from "../lib/room/updateSubmitRoomAnswer";
-import { updateTimeOver } from "../lib/room/updateTimeOver";
-import { updateEnterRoom } from "../lib/room/updateEnterRoom";
-import { updateRoomAfterLeave } from "../lib/room/updateLeaveRoom";
-import { updateRoomAfterNextQuestion } from "../lib/room/updateNextQuestion";
-import { updateStartRoomGame } from "../lib/room/updateStartRoomGame";
-import { updateCountdownEnd } from "../lib/room/updateCountdownEnd";
-import { updateRestartRoomGame } from "../lib/room/updateRestartRoomGame";
+import {
+  updateCountdownEnd,
+  updateEnterRoom,
+  updateLeaveRoom,
+  updateNextQuestion,
+  updateRestartRoomGame,
+  updateStartRoomGame,
+  updateSubmitRoomAnswer,
+  updateTimeOver,
+} from "../lib/room";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
@@ -166,7 +168,7 @@ export default function HomeClient() {
       prev
         .map((room) =>
           room.id === enteredRoomId
-            ? updateRoomAfterLeave(room, currentPlayerId)
+            ? updateLeaveRoom(room, currentPlayerId)
             : room,
         )
         .filter((room) => room.players.length > 0),
@@ -240,7 +242,7 @@ export default function HomeClient() {
   const nextQuestion = (roomId: string) => {
     setRooms((prev) =>
       prev.map((room) =>
-        room.id === roomId ? updateRoomAfterNextQuestion(room) : room,
+        room.id === roomId ? updateNextQuestion(room) : room,
       ),
     );
   };

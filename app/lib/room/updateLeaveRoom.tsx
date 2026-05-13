@@ -1,9 +1,6 @@
 import type { Room, ChatMessage } from "@/app/types/quiz";
 
-export function updateRoomAfterLeave(
-  room: Room,
-  currentPlayerId: string,
-): Room {
+export function updateLeaveRoom(room: Room, currentPlayerId: string): Room {
   const leavingPlayer = room.players.find(
     (player) => player.id === currentPlayerId,
   );
