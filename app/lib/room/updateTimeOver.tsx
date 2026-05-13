@@ -1,4 +1,4 @@
-import type { Room } from "../../types/quiz";
+import type { Room } from "@/app/types/quiz";
 
 export function updateTimeOver(room: Room): Room {
   if (room.status !== "playing") {
