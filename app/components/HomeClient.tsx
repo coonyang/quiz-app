@@ -16,8 +16,8 @@ import type {
   Room,
   ChatMessage,
 } from "../types/quiz";
-import { handleSubmitRoomAnswer } from "../lib/room/handleSubmitRoomAnswer";
-import { handleTimeOver } from "../lib/room/handleTimeOver";
+import { updateSubmitRoomAnswer } from "../lib/room/updateSubmitRoomAnswer";
+import { updateTimeOver } from "../lib/room/updateTimeOver";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
@@ -279,7 +279,7 @@ export default function HomeClient() {
     setRooms((prev) =>
       prev.map((room) => {
         if (room.id !== roomId) return room;
-        return handleSubmitRoomAnswer(room, playerId, choiceIndex, timeLeft);
+        return updateSubmitRoomAnswer(room, playerId, choiceIndex, timeLeft);
       }),
     );
   };
@@ -288,7 +288,7 @@ export default function HomeClient() {
     setRooms((prev) =>
       prev.map((room) => {
         if (room.id !== roomId) return room;
-        return handleTimeOver(room);
+        return updateTimeOver(room);
       }),
     );
 

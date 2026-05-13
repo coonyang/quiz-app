@@ -1,6 +1,6 @@
 import type { Room } from "../../types/quiz";
 
-export function handleTimeOver(room: Room): Room {
+export function updateTimeOver(room: Room): Room {
   if (room.status !== "playing") {
     return room;
   }

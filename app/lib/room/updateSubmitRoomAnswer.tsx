@@ -1,6 +1,6 @@
 import type { Room } from "../../types/quiz";
 
-export function handleSubmitRoomAnswer(
+export function updateSubmitRoomAnswer(
   room: Room,
   playerId: string,
   choiceIndex: number,
