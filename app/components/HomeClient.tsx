@@ -154,7 +154,6 @@ export default function HomeClient() {
       prev.map((room) => {
         if (room.id !== roomId) return room;
         if (room.status !== "waiting") {
-          alert("게임이 시작된 방입니다.");
           return room;
         }
         const alreadyJoined = room.players.some(

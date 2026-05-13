@@ -67,10 +67,17 @@ export default function RoomLobby({
 
                 <button
                   onClick={() => onEnterRoom(room.id)}
-                  disabled={room.players.length >= room.maxPlayers}
+                  disabled={
+                    room.players.length >= room.maxPlayers ||
+                    room.status !== "waiting"
+                  }
                   className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  {room.players.length >= room.maxPlayers ? "가득참" : "입장"}
+                  {room.status !== "waiting"
+                    ? "게임중"
+                    : room.players.length >= room.maxPlayers
+                      ? "가득참"
+                      : "입장"}
                 </button>
               </div>
             </div>
