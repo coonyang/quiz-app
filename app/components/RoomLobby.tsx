@@ -1,4 +1,6 @@
 import { Room } from "../types/quiz";
+import { useState } from "react";
+
 type RoomLobbyProps = {
   rooms: Room[];
   onEnterRoom: (roomId: string) => void;
@@ -10,6 +12,17 @@ export default function RoomLobby({
   rooms,
   onOpenCreateRoomModal,
 }: RoomLobbyProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const roomsPerPage = 5;
+
+  const totalPages = Math.ceil(rooms.length / roomsPerPage);
+
+  const startIndex = (currentPage - 1) * roomsPerPage;
+  const endIndex = startIndex + roomsPerPage;
+
+  const currentRooms = rooms.slice(startIndex, endIndex);
+  const hasPages = totalPages > 0;
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -23,36 +36,76 @@ export default function RoomLobby({
         </button>
       </div>
 
-      <div className="grid gap-3">
-        {rooms.map((room) => (
-          <div key={room.id} className="rounded-lg border p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="font-semibold">{room.title}</h2>
+      <div className="grid min-h-[420px] gap-3">
+        {currentRooms.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed text-center">
+            <p className="text-lg font-semibold">방이 없습니다</p>
 
-                <p className="mt-1 text-sm text-gray-500">
-                  문제집: {room.quizSetTitle}
-                </p>
-
-                <p className="mt-1 text-sm text-gray-500">
-                  방장: {room.hostNickname}
-                </p>
-
-                <p className="mt-2 text-sm font-medium">
-                  인원: {room.players.length} / {room.maxPlayers}
-                </p>
-              </div>
-
-              <button
-                onClick={() => onEnterRoom(room.id)}
-                disabled={room.players.length >= room.maxPlayers}
-                className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {room.players.length >= room.maxPlayers ? "가득참" : "입장"}
-              </button>
-            </div>
+            <p className="mt-2 text-sm text-gray-500">
+              새로운 방을 만들어보세요!
+            </p>
           </div>
+        ) : (
+          currentRooms.map((room) => (
+            <div key={room.id} className="rounded-lg border p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="font-semibold">{room.title}</h2>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    문제집: {room.quizSetTitle}
+                  </p>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    방장: {room.hostNickname}
+                  </p>
+
+                  <p className="mt-2 text-sm font-medium">
+                    인원: {room.players.length} / {room.maxPlayers}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => onEnterRoom(room.id)}
+                  disabled={room.players.length >= room.maxPlayers}
+                  className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {room.players.length >= room.maxPlayers ? "가득참" : "입장"}
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="flex items-center justify-center gap-2">
+        <button
+          onClick={() => setCurrentPage((prev) => prev - 1)}
+          disabled={currentPage === 1}
+          className="rounded border px-3 py-1 disabled:opacity-40"
+        >
+          이전
+        </button>
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            onClick={() => setCurrentPage(page)}
+            className={`rounded border px-3 py-1 ${
+              currentPage === page ? "bg-emerald-300" : ""
+            }`}
+          >
+            {page}
+          </button>
         ))}
+
+        <button
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+          disabled={!hasPages || currentPage === 1}
+          className="rounded border px-3 py-1 disabled:opacity-40"
+        >
+          다음
+        </button>
       </div>
     </section>
   );
