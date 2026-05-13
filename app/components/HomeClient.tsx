@@ -23,6 +23,7 @@ import { updateRoomAfterLeave } from "../lib/room/updateLeaveRoom";
 import { updateRoomAfterNextQuestion } from "../lib/room/updateNextQuestion";
 import { updateStartRoomGame } from "../lib/room/updateStartRoomGame";
 import { updateCountdownEnd } from "../lib/room/updateCountdownEnd";
+import { updateRestartRoomGame } from "../lib/room/updateRestartRoomGame";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
@@ -231,19 +232,7 @@ export default function HomeClient() {
     setRooms((prev) =>
       prev.map((room) => {
         if (room.id !== roomId) return room;
-        return {
-          ...room,
-          status: "waiting",
-          currentQuestionIndex: 0,
-          questionStartedAt: null,
-          players: room.players.map((player) => {
-            return {
-              ...player,
-              score: 0,
-              answeredQuestionIndex: undefined,
-            };
-          }),
-        };
+        return updateRestartRoomGame(room);
       }),
     );
   };
