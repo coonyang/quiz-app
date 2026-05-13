@@ -43,7 +43,7 @@ export type Room = {
   players: Player[];
   maxPlayers: number;
   messages: ChatMessage[];
-  status: "waiting" | "playing" | "finished" | "countdown";
+  status: "waiting" | "playing" | "finished" | "countdown" | "result";
   currentQuestionIndex: number;
   quizQuestions: Question[];
   questionStartedAt: number | null;
