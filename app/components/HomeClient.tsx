@@ -9,30 +9,13 @@ import RoomScreen from "./RoomScreen";
 import StartScreen from "./StartScreen";
 import { quizSets } from "../data/quizSets";
 import { useEffect, useState } from "react";
-import type {
-  RankingRecord,
-  Question,
-  QuizSet,
-  Room,
-  ChatMessage,
-} from "../types/quiz";
+import type { RankingRecord, Question, QuizSet } from "../types/quiz";
+
+import { useRoomGame } from "../hooks/useRoomGame";
+import { useSoloQuiz } from "../hooks/useSoloQuiz";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
-
-  /* 혼자 풀기 퀴즈 상태 */
-  const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isStarted, setIsStarted] = useState(false);
-  const [score, setScore] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
-  const [isAnswerChecked, setIsAnswerChecked] = useState(false);
-  const [answers, setAnswers] = useState<number[]>([]);
-  const [startTime, setStartTime] = useState<number | null>(null);
-  const [finishTime, setFinishTime] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
 
   /* 유저와 문제집 상태 */
   const [nickname, setNickname] = useState("");
@@ -47,8 +30,6 @@ export default function HomeClient() {
 
   /* 온라인 방 상태 */
   const [playMode, setPlayMode] = useState<"solo" | "online">("solo");
-  const [enteredRoomId, setEnteredRoomId] = useState<string | null>(null);
-  const [rooms, setRooms] = useState<Room[]>([]);
   const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
   const [currentPlayerId] = useState(() => crypto.randomUUID());
 
@@ -64,8 +45,6 @@ export default function HomeClient() {
     selectedCategory === "전체" || selectedCategory === ""
       ? allQuizSets
       : allQuizSets.filter((item) => item.category === selectedCategory);
-
-  const currentQuestion = quizQuestions[currentIndex];
 
   /* localStorage에 저장된 데이터 불러오기 */
   useEffect(() => {
@@ -92,310 +71,32 @@ export default function HomeClient() {
     }
   }, []);
 
-  /* 혼자 풀기 퀴즈 타이머 */
-  useEffect(() => {
-    if (!isStarted || isAnswerChecked) return;
-
-    if (timeLeft <= 0) {
-      selectChoice(-1);
-      return;
-    }
-
-    const timerId = setTimeout(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearTimeout(timerId);
-  }, [isStarted, isAnswerChecked, timeLeft]);
-
-  /* 퀴즈 종료 후 랭킹 저장 */
-  useEffect(() => {
-    if (!isFinished || !finishTime || !startTime) return;
-
-    saveRanking(finishTime);
-  }, [isFinished, finishTime]);
-
   /* 온라인 방 관련 함수 */
-  const updateRoomQuizSet = (roomId: string, quizSetId: string) => {
-    const selectedQuizSet = allQuizSets.find((quiz) => quiz.id === quizSetId);
-    if (!selectedQuizSet) return;
+  const {
+    rooms,
+    enteredRoomId,
+    enteredRoom,
 
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
+    createRoom,
+    enterRoom,
+    leaveRoom,
 
-        return {
-          ...room,
-          quizSetId: selectedQuizSet.id,
-          quizSetTitle: selectedQuizSet.title,
-          quizQuestions: selectedQuizSet.questions,
-        };
-      }),
-    );
-  };
+    roomQuizSet,
+    sendRoomMessage,
 
-  const createRoom = (room: Room) => {
-    setRooms((prev) => [room, ...prev]);
-    setIsCreateRoomModalOpen(false);
-    setEnteredRoomId(room.id);
-  };
+    startRoomGame,
+    submitRoomAnswer,
 
-  const enterRoom = (roomId: string) => {
-    const playerNickname = nickname.trim() || "익명";
-    const newMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      nickname: "시스템",
-      message: `${playerNickname}님이 입장했습니다`,
-      createdAt: new Date().toISOString(),
-      playerId: "system",
-    };
+    timeOver,
+    countdownEnd,
 
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
-        if (room.status !== "waiting") {
-          alert("게임이 시작된 방입니다.");
-          return room;
-        }
-        const alreadyJoined = room.players.some(
-          (player) => player.id === currentPlayerId,
-        );
-
-        if (alreadyJoined) return room;
-
-        if (room.players.length >= room.maxPlayers) return room;
-
-        return {
-          ...room,
-          messages: [...room.messages, newMessage],
-          players: [
-            ...room.players,
-            {
-              id: currentPlayerId,
-              nickname: playerNickname,
-              isHost: false,
-              score: 0,
-            },
-          ],
-        };
-      }),
-    );
-
-    setEnteredRoomId(roomId);
-  };
-
-  const leaveRoom = () => {
-    if (!enteredRoomId) return;
-
-    setRooms((prev) =>
-      prev
-        .map((room) => {
-          if (room.id !== enteredRoomId) return room;
-          const leavingPlayer = room.players.find(
-            (player) => player.id == currentPlayerId,
-          );
-          const nextPlayers = room.players.filter(
-            (player) => player.id !== currentPlayerId,
-          );
-          const newMessage: ChatMessage = {
-            id: crypto.randomUUID(),
-            nickname: "시스템",
-            message: `${leavingPlayer?.nickname}님이 퇴장했습니다`,
-            createdAt: new Date().toISOString(),
-            playerId: "system",
-          };
-          const nextMessages = [...room.messages, newMessage];
-          if (leavingPlayer?.isHost === true && nextPlayers.length > 0) {
-            nextPlayers[0].isHost = true;
-            const newMessage2: ChatMessage = {
-              id: crypto.randomUUID(),
-              nickname: "시스템",
-              message: `${nextPlayers[0].nickname}님이 방장이 되었습니다.`,
-              createdAt: new Date().toISOString(),
-              playerId: "system",
-            };
-            nextMessages.push(newMessage2);
-          }
-          return room.id === enteredRoomId
-            ? {
-                ...room,
-                players: nextPlayers,
-                messages: nextMessages,
-              }
-            : room;
-        })
-        .filter((room) => room.players.length > 0),
-    );
-
-    setEnteredRoomId(null);
-  };
-
-  const enteredRoom = rooms.find((room) => room.id === enteredRoomId);
-
-  const sendRoomMessage = (roomId: string, message: ChatMessage) => {
-    setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId
-          ? {
-              ...room,
-              messages: [...room.messages, message],
-            }
-          : room,
-      ),
-    );
-  };
-
-  const startRoomGame = (roomId: string) => {
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
-        const newMessage: ChatMessage = {
-          id: crypto.randomUUID(),
-          nickname: "시스템",
-          message: "게임이 시작되었습니다.",
-          createdAt: new Date().toISOString(),
-          playerId: "system",
-        };
-
-        return room.id === roomId
-          ? {
-              ...room,
-              status: "countdown",
-
-              messages: [...room.messages, newMessage],
-            }
-          : room;
-      }),
-    );
-  };
-
-  const submitRoomAnswer = (
-    roomId: string,
-    playerId: string,
-    choiceIndex: number,
-    timeLeft: number,
-  ) => {
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
-        const currentQuestion = room.quizQuestions[room.currentQuestionIndex];
-        const isCorrect = choiceIndex === currentQuestion.answerIndex;
-
-        const updatedPlayers = room.players.map((player) => {
-          if (player.id !== playerId) {
-            return player;
-          }
-          if (player.answeredQuestionIndex === room.currentQuestionIndex) {
-            return player;
-          }
-          return {
-            ...player,
-            score: isCorrect ? player.score + 100 + timeLeft : player.score,
-            answeredQuestionIndex: room.currentQuestionIndex,
-          };
-        });
-        const allAnswered = updatedPlayers.every(
-          (player) =>
-            player.answeredQuestionIndex === room.currentQuestionIndex,
-        );
-        const isLastQuestion =
-          room.currentQuestionIndex >= room.quizQuestions.length - 1;
-
-        if (allAnswered && isLastQuestion) {
-          return {
-            ...room,
-            players: updatedPlayers,
-            status: "finished",
-          };
-        }
-
-        if (allAnswered) {
-          return {
-            ...room,
-            questionStartedAt: Date.now(),
-            players: updatedPlayers.map((player) => ({
-              ...player,
-              answeredQuestionIndex: undefined,
-            })),
-            currentQuestionIndex: room.currentQuestionIndex + 1,
-          };
-        }
-
-        return {
-          ...room,
-          players: updatedPlayers,
-        };
-      }),
-    );
-  };
-
-  const timeOver = (roomId: string) =>
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
-        if (room.status !== "playing") return room;
-        const updatedPlayers = room.players.map((player) => {
-          if (player.answeredQuestionIndex === room.currentQuestionIndex) {
-            return player;
-          }
-          return {
-            ...player,
-            answeredQuestionIndex: room.currentQuestionIndex,
-          };
-        });
-        const isLastQuestion =
-          room.currentQuestionIndex >= room.quizQuestions.length - 1;
-        if (isLastQuestion) {
-          return {
-            ...room,
-            players: updatedPlayers,
-            status: "finished",
-          };
-        }
-        return {
-          ...room,
-          players: updatedPlayers.map((player) => ({
-            ...player,
-            answeredQuestionIndex: undefined,
-          })),
-          currentQuestionIndex: room.currentQuestionIndex + 1,
-          questionStartedAt: Date.now(),
-        };
-      }),
-    );
-
-  const countdownEnd = (roomId: string) =>
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
-        return {
-          ...room,
-          status: "playing",
-          questionStartedAt: Date.now(),
-        };
-      }),
-    );
-
-  const restartRoomGame = (roomId: string) => {
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.id !== roomId) return room;
-        return {
-          ...room,
-          status: "waiting",
-          currentQuestionIndex: 0,
-          questionStartedAt: null,
-          players: room.players.map((player) => {
-            return {
-              ...player,
-              score: 0,
-              answeredQuestionIndex: undefined,
-            };
-          }),
-        };
-      }),
-    );
-  };
+    restartRoomGame,
+    nextQuestion,
+  } = useRoomGame({
+    allQuizSets,
+    nickname,
+    currentPlayerId,
+  });
 
   /* 문제집 관리 함수 */
   const handleSelectCategory = (category: string) => {
@@ -439,120 +140,39 @@ export default function HomeClient() {
   };
 
   /* 혼자 풀기 퀴즈 진행 함수 */
-  const startQuiz = () => {
-    if (!nickname.trim()) return;
-
-    const selectedQuizSet = allQuizSets.find(
+  const {
+    quizQuestions,
+    currentQuestion,
+    currentIndex,
+    score,
+    correctCount,
+    answers,
+    selectedChoice,
+    isAnswerChecked,
+    isQuizFinished,
+    startTime,
+    finishTime,
+    timeLeft,
+    startQuiz,
+    selectChoice,
+    goHome,
+  } = useSoloQuiz({
+    selectedQuizSet: allQuizSets.find(
       (quizSet) => quizSet.id === selectedQuizSetId,
-    );
+    ),
 
-    if (!selectedQuizSet) return;
+    nickname,
 
-    localStorage.setItem("nickname", nickname.trim());
+    rankings,
 
-    const shuffled = [...selectedQuizSet.questions].sort(
-      () => Math.random() - 0.5,
-    );
-    const selected = shuffled.slice(0, 10);
-
-    setStartTime(Date.now());
-    setFinishTime(null);
-    setTimeLeft(TIME_LIMIT);
-    setCorrectCount(0);
-    setQuizQuestions(selected);
-    setCurrentIndex(0);
-    setIsStarted(true);
-    setScore(0);
-    setIsFinished(false);
-    setAnswers([]);
-  };
-
-  const selectChoice = (choiceIndex: number) => {
-    if (isAnswerChecked) return;
-
-    const answer = currentQuestion.answerIndex;
-
-    setSelectedChoice(choiceIndex);
-    setIsAnswerChecked(true);
-    setAnswers((prev) => [...prev, choiceIndex]);
-
-    if (choiceIndex === answer) {
-      setScore((prev) => prev + 100 + timeLeft);
-      setCorrectCount((prev) => prev + 1);
-    }
-
-    setTimeout(() => {
-      if (currentIndex < quizQuestions.length - 1) {
-        setCurrentIndex((prev) => prev + 1);
-        setSelectedChoice(null);
-        setIsAnswerChecked(false);
-        setTimeLeft(TIME_LIMIT);
-      } else {
-        setFinishTime(Date.now());
-        setIsStarted(false);
-        setIsFinished(true);
-        setSelectedChoice(null);
-        setIsAnswerChecked(false);
-      }
-    }, 300);
-  };
-
-  const goHome = () => {
-    setIsStarted(false);
-    setIsFinished(false);
-    setQuizQuestions([]);
-    setCurrentIndex(0);
-    setSelectedChoice(null);
-    setIsAnswerChecked(false);
-    setAnswers([]);
-    setScore(0);
-    setCorrectCount(0);
-    setStartTime(null);
-    setFinishTime(null);
-    setTimeLeft(TIME_LIMIT);
-  };
-
-  /* 랭킹 관련 함수 */
-  const saveRanking = (finishedAt: number) => {
-    if (!startTime) return;
-
-    const selectedQuizSet = allQuizSets.find(
-      (quizSet) => quizSet.id === selectedQuizSetId,
-    );
-
-    if (!selectedQuizSet) return;
-
-    const elapsedSeconds = Math.ceil((finishedAt - startTime) / 1000);
-
-    const newRecord: RankingRecord = {
-      id: crypto.randomUUID(),
-      nickname,
-      quizSetId: selectedQuizSet.id,
-      quizSetTitle: selectedQuizSet.title,
-      category: selectedQuizSet.category,
-      score,
-      correctCount,
-      totalQuestions: quizQuestions.length,
-      elapsedSeconds,
-      createdAt: new Date().toISOString(),
-    };
-
-    const nextRankings = [newRecord, ...rankings]
-      .sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return a.elapsedSeconds - b.elapsedSeconds;
-      })
-      .slice(0, 20);
-
-    setRankings(nextRankings);
-    localStorage.setItem("rankings", JSON.stringify(nextRankings));
-  };
+    setRankings,
+  });
 
   return (
     <main className="min-h-screen px-4 py-4">
       <div className="mx-auto max-w-6xl">
         <section className="min-w-0">
-          {!isStarted && !isFinished && (
+          {!currentQuestion && !isQuizFinished && (
             <>
               {!enteredRoomId && (
                 <div className="mx-auto mb-4 flex max-w-xl gap-2">
@@ -650,13 +270,14 @@ export default function HomeClient() {
                   onCountdownEnd={countdownEnd}
                   onRestartRoomGame={restartRoomGame}
                   quizSets={allQuizSets}
-                  onUpdateRoomQuizSet={updateRoomQuizSet}
+                  onUpdateRoomQuizSet={roomQuizSet}
+                  onNextQuestion={nextQuestion}
                 />
               )}
             </>
           )}
 
-          {isStarted && currentQuestion && (
+          {currentQuestion && !isQuizFinished && (
             <QuizScreen
               currentIndex={currentIndex}
               quizQuestions={quizQuestions}
@@ -668,7 +289,7 @@ export default function HomeClient() {
             />
           )}
 
-          {isFinished && (
+          {isQuizFinished && (
             <ResultScreen
               quizQuestions={quizQuestions}
               score={score}

@@ -15,6 +15,7 @@ type RoomScreenProps = {
   onRestartRoomGame: (roomId: string) => void;
   quizSets: QuizSet[];
   onUpdateRoomQuizSet: (roomId: string, quizSetId: string) => void;
+  onNextQuestion: (roomId: string) => void;
   submitRoomAnswer: (
     roomId: string,
     playerId: string,
@@ -35,11 +36,13 @@ export default function RoomScreen({
   onTimeOver,
   onCountdownEnd,
   onRestartRoomGame,
+  onNextQuestion,
   onUpdateRoomQuizSet,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
   const [now, setNow] = useState(Date.now());
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [resultCountdown, setResultCountdown] = useState<number | null>(null);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const remainingMs = room.questionStartedAt
     ? room.timeLimit * 1000 - (now - room.questionStartedAt)
@@ -101,6 +104,27 @@ export default function RoomScreen({
       onCountdownEnd(room.id);
     }
   }, [countdown, room.status]);
+
+  useEffect(() => {
+    if (room.status !== "result") return;
+    setResultCountdown(2);
+    const timerId = setInterval(() => {
+      setResultCountdown((prev) => {
+        if (prev === null) return 2;
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearTimeout(timerId);
+  }, [room.status]);
+
+  useEffect(() => {
+    if (room.status !== "result") return;
+
+    if (resultCountdown !== null && resultCountdown <= 0) {
+      onNextQuestion(room.id);
+    }
+  }, [resultCountdown, room.status]);
 
   const sendMessage = () => {
     if (!messageText.trim()) return;
@@ -238,6 +262,9 @@ export default function RoomScreen({
                 ))}
               </div>
             </>
+          )}
+          {room.status === "result" && (
+            <p>{resultCountdown}초 뒤 다음 문제로 넘어갑니다...</p>
           )}
           {room.status === "finished" && (
             <div>
