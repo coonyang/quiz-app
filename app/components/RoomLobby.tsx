@@ -100,8 +100,10 @@ export default function RoomLobby({
         ))}
 
         <button
-          onClick={() => setCurrentPage((prev) => prev + 1)}
-          disabled={!hasPages || currentPage === 1}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={!hasPages || currentPage === totalPages}
           className="rounded border px-3 py-1 disabled:opacity-40"
         >
           다음
