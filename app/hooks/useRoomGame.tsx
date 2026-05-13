@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { Room, ChatMessage, QuizSet } from "../types/quiz";
 
 import {
   updateCountdownEnd,
-  updateEnterRoom,
   updateLeaveRoom,
   updateNextQuestion,
   updateRestartRoomGame,
@@ -15,6 +14,7 @@ import {
   updateTimeOver,
   updateRoomQuizSet,
 } from "../lib/room";
+import { socket } from "../lib/socket/socket";
 
 type UseRoomGameProps = {
   allQuizSets: QuizSet[];
@@ -30,6 +30,26 @@ export function useRoomGame({
   const [rooms, setRooms] = useState<Room[]>([]);
   const [enteredRoomId, setEnteredRoomId] = useState<string | null>(null);
 
+  useEffect(() => {
+    socket.on("roomsUpdated", (rooms) => {
+      setRooms(rooms);
+
+      const joinedRoom = rooms.find((room: Room) =>
+        room.players.some((player) => player.id === currentPlayerId),
+      );
+
+      if (joinedRoom) {
+        setEnteredRoomId(joinedRoom.id);
+      } else {
+        setEnteredRoomId(null);
+      }
+    });
+
+    return () => {
+      socket.off("roomsUpdated");
+    };
+  }, [currentPlayerId]);
+
   const roomQuizSet = (roomId: string, quizSetId: string) => {
     const selectedQuizSet = allQuizSets.find((quiz) => quiz.id === quizSetId);
 
@@ -43,21 +63,17 @@ export function useRoomGame({
   };
 
   const createRoom = (room: Room) => {
-    setRooms((prev) => [room, ...prev]);
+    socket.emit("createRoom", room);
 
     setEnteredRoomId(room.id);
   };
 
   const enterRoom = (roomId: string) => {
-    setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId
-          ? updateEnterRoom(room, currentPlayerId, nickname)
-          : room,
-      ),
-    );
-
-    setEnteredRoomId(roomId);
+    socket.emit("enterRoom", {
+      roomId,
+      currentPlayerId,
+      nickname,
+    });
   };
 
   const leaveRoom = () => {

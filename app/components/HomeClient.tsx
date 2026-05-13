@@ -15,8 +15,6 @@ import { useRoomGame } from "../hooks/useRoomGame";
 import { useSoloQuiz } from "../hooks/useSoloQuiz";
 import { socket } from "../lib/socket/socket";
 export default function HomeClient() {
-  const TIME_LIMIT = 30;
-
   /* 유저와 문제집 상태 */
   const [nickname, setNickname] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("전체");
@@ -265,7 +263,9 @@ export default function HomeClient() {
                   )}
                 </>
               )}
-
+              {playMode === "online" && enteredRoomId && !enteredRoom && (
+                <p>방 입장 중...</p>
+              )}
               {playMode === "online" && enteredRoom && (
                 <RoomScreen
                   key={`${enteredRoom.id}-${enteredRoom.status}`}
