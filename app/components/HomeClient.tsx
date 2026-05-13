@@ -12,23 +12,10 @@ import { useEffect, useState } from "react";
 import type { RankingRecord, Question, QuizSet } from "../types/quiz";
 
 import { useRoomGame } from "../hooks/useRoomGame";
+import { useSoloQuiz } from "../hooks/useSoloQuiz";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
-
-  /* 혼자 풀기 퀴즈 상태 */
-  const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isStarted, setIsStarted] = useState(false);
-  const [score, setScore] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
-  const [isAnswerChecked, setIsAnswerChecked] = useState(false);
-  const [answers, setAnswers] = useState<number[]>([]);
-  const [startTime, setStartTime] = useState<number | null>(null);
-  const [finishTime, setFinishTime] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
 
   /* 유저와 문제집 상태 */
   const [nickname, setNickname] = useState("");
@@ -59,8 +46,6 @@ export default function HomeClient() {
       ? allQuizSets
       : allQuizSets.filter((item) => item.category === selectedCategory);
 
-  const currentQuestion = quizQuestions[currentIndex];
-
   /* localStorage에 저장된 데이터 불러오기 */
   useEffect(() => {
     const savedCustomQuizSets = localStorage.getItem("customQuizSets");
@@ -85,29 +70,6 @@ export default function HomeClient() {
       setRankings(JSON.parse(savedRankings));
     }
   }, []);
-
-  /* 혼자 풀기 퀴즈 타이머 */
-  useEffect(() => {
-    if (!isStarted || isAnswerChecked) return;
-
-    if (timeLeft <= 0) {
-      selectChoice(-1);
-      return;
-    }
-
-    const timerId = setTimeout(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearTimeout(timerId);
-  }, [isStarted, isAnswerChecked, timeLeft]);
-
-  /* 퀴즈 종료 후 랭킹 저장 */
-  useEffect(() => {
-    if (!isFinished || !finishTime || !startTime) return;
-
-    saveRanking(finishTime);
-  }, [isFinished, finishTime]);
 
   /* 온라인 방 관련 함수 */
   const {
@@ -178,120 +140,39 @@ export default function HomeClient() {
   };
 
   /* 혼자 풀기 퀴즈 진행 함수 */
-  const startQuiz = () => {
-    if (!nickname.trim()) return;
-
-    const selectedQuizSet = allQuizSets.find(
+  const {
+    quizQuestions,
+    currentQuestion,
+    currentIndex,
+    score,
+    correctCount,
+    answers,
+    selectedChoice,
+    isAnswerChecked,
+    isQuizFinished,
+    startTime,
+    finishTime,
+    timeLeft,
+    startQuiz,
+    selectChoice,
+    goHome,
+  } = useSoloQuiz({
+    selectedQuizSet: allQuizSets.find(
       (quizSet) => quizSet.id === selectedQuizSetId,
-    );
+    ),
 
-    if (!selectedQuizSet) return;
+    nickname,
 
-    localStorage.setItem("nickname", nickname.trim());
+    rankings,
 
-    const shuffled = [...selectedQuizSet.questions].sort(
-      () => Math.random() - 0.5,
-    );
-    const selected = shuffled.slice(0, 10);
-
-    setStartTime(Date.now());
-    setFinishTime(null);
-    setTimeLeft(TIME_LIMIT);
-    setCorrectCount(0);
-    setQuizQuestions(selected);
-    setCurrentIndex(0);
-    setIsStarted(true);
-    setScore(0);
-    setIsFinished(false);
-    setAnswers([]);
-  };
-
-  const selectChoice = (choiceIndex: number) => {
-    if (isAnswerChecked) return;
-
-    const answer = currentQuestion.answerIndex;
-
-    setSelectedChoice(choiceIndex);
-    setIsAnswerChecked(true);
-    setAnswers((prev) => [...prev, choiceIndex]);
-
-    if (choiceIndex === answer) {
-      setScore((prev) => prev + 100 + timeLeft);
-      setCorrectCount((prev) => prev + 1);
-    }
-
-    setTimeout(() => {
-      if (currentIndex < quizQuestions.length - 1) {
-        setCurrentIndex((prev) => prev + 1);
-        setSelectedChoice(null);
-        setIsAnswerChecked(false);
-        setTimeLeft(TIME_LIMIT);
-      } else {
-        setFinishTime(Date.now());
-        setIsStarted(false);
-        setIsFinished(true);
-        setSelectedChoice(null);
-        setIsAnswerChecked(false);
-      }
-    }, 300);
-  };
-
-  const goHome = () => {
-    setIsStarted(false);
-    setIsFinished(false);
-    setQuizQuestions([]);
-    setCurrentIndex(0);
-    setSelectedChoice(null);
-    setIsAnswerChecked(false);
-    setAnswers([]);
-    setScore(0);
-    setCorrectCount(0);
-    setStartTime(null);
-    setFinishTime(null);
-    setTimeLeft(TIME_LIMIT);
-  };
-
-  /* 랭킹 관련 함수 */
-  const saveRanking = (finishedAt: number) => {
-    if (!startTime) return;
-
-    const selectedQuizSet = allQuizSets.find(
-      (quizSet) => quizSet.id === selectedQuizSetId,
-    );
-
-    if (!selectedQuizSet) return;
-
-    const elapsedSeconds = Math.ceil((finishedAt - startTime) / 1000);
-
-    const newRecord: RankingRecord = {
-      id: crypto.randomUUID(),
-      nickname,
-      quizSetId: selectedQuizSet.id,
-      quizSetTitle: selectedQuizSet.title,
-      category: selectedQuizSet.category,
-      score,
-      correctCount,
-      totalQuestions: quizQuestions.length,
-      elapsedSeconds,
-      createdAt: new Date().toISOString(),
-    };
-
-    const nextRankings = [newRecord, ...rankings]
-      .sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return a.elapsedSeconds - b.elapsedSeconds;
-      })
-      .slice(0, 20);
-
-    setRankings(nextRankings);
-    localStorage.setItem("rankings", JSON.stringify(nextRankings));
-  };
+    setRankings,
+  });
 
   return (
     <main className="min-h-screen px-4 py-4">
       <div className="mx-auto max-w-6xl">
         <section className="min-w-0">
-          {!isStarted && !isFinished && (
+          {!currentQuestion && !isQuizFinished && (
             <>
               {!enteredRoomId && (
                 <div className="mx-auto mb-4 flex max-w-xl gap-2">
@@ -396,7 +277,7 @@ export default function HomeClient() {
             </>
           )}
 
-          {isStarted && currentQuestion && (
+          {currentQuestion && !isQuizFinished && (
             <QuizScreen
               currentIndex={currentIndex}
               quizQuestions={quizQuestions}
@@ -408,7 +289,7 @@ export default function HomeClient() {
             />
           )}
 
-          {isFinished && (
+          {isQuizFinished && (
             <ResultScreen
               quizQuestions={quizQuestions}
               score={score}
