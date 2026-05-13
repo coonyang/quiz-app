@@ -22,6 +22,7 @@ import { updateEnterRoom } from "../lib/room/updateEnterRoom";
 import { updateRoomAfterLeave } from "../lib/room/updateLeaveRoom";
 import { updateRoomAfterNextQuestion } from "../lib/room/updateNextQuestion";
 import { updateStartRoomGame } from "../lib/room/updateStartRoomGame";
+import { updateCountdownEnd } from "../lib/room/updateCountdownEnd";
 
 export default function HomeClient() {
   const TIME_LIMIT = 30;
@@ -222,11 +223,7 @@ export default function HomeClient() {
     setRooms((prev) =>
       prev.map((room) => {
         if (room.id !== roomId) return room;
-        return {
-          ...room,
-          status: "playing",
-          questionStartedAt: Date.now(),
-        };
+        return updateCountdownEnd(room);
       }),
     );
 
