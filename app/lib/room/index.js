@@ -6,3 +6,4 @@ export { updateRestartRoomGame } from "./updateRestartRoomGame";
 export { updateStartRoomGame } from "./updateStartRoomGame";
 export { updateSubmitRoomAnswer } from "./updateSubmitRoomAnswer";
 export { updateTimeOver } from "./updateTimeOver";
+export { updateRoomQuizSet } from "./updateRoomQuizSet";
