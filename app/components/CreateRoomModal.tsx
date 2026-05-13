@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Room, QuizSet } from "../types/quiz";
+import { updateCreateRoom } from "../lib/room/updateCreateRoom";
 
 type CreateRoomModalProps = {
   nickname: string;
@@ -23,50 +24,27 @@ export default function CreateRoomModal({
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [errorMessage, setErrorMessage] = useState("");
   const createRoom = () => {
-    const selectedQuizSet = quizSets.find(
-      (quizSet) => quizSet.id === quizSetId,
-    );
-
     if (!title.trim()) {
       setErrorMessage("방 제목을 입력해주세요.");
       return;
     }
 
+    const selectedQuizSet = quizSets.find(
+      (quizSet) => quizSet.id === quizSetId,
+    );
+
     if (!selectedQuizSet) {
       setErrorMessage("문제집을 선택해주세요.");
       return;
     }
-    const hostNickname = nickname.trim() || "익명";
-    const newRoom: Room = {
-      id: crypto.randomUUID(),
-      title: title.trim(),
-      quizSetId: selectedQuizSet.id,
-      quizSetTitle: selectedQuizSet.title,
-      hostNickname,
-      players: [
-        {
-          id: currentPlayerId,
-          nickname: hostNickname,
-          isHost: true,
-          score: 0,
-        },
-      ],
+
+    const newRoom = updateCreateRoom(
+      title,
+      selectedQuizSet,
+      nickname,
+      currentPlayerId,
       maxPlayers,
-      messages: [
-        {
-          id: crypto.randomUUID(),
-          playerId: "system",
-          nickname: "시스템",
-          message: `${hostNickname}님이 방을 만들었습니다.`,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-      status: "waiting",
-      currentQuestionIndex: 0,
-      quizQuestions: selectedQuizSet.questions,
-      questionStartedAt: null,
-      timeLimit: 30,
-    };
+    );
 
     onCreateRoom(newRoom);
   };
