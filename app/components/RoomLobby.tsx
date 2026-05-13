@@ -36,12 +36,12 @@ export default function RoomLobby({
         </button>
       </div>
 
-      <div className="grid min-h-[420px] gap-3">
+      <div className="mt-4 flex flex-col gap-3">
         {currentRooms.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed text-center">
-            <p className="text-lg font-semibold">방이 없습니다</p>
+            <p className="text-lg font-semibold mt-5">방이 없습니다</p>
 
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-gray-500 p-5">
               새로운 방을 만들어보세요!
             </p>
           </div>
