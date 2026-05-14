@@ -24,21 +24,12 @@
 온라인 게임의 흐름을 상태 중심으로 설계하는 방향으로 개발했습니다.
 
 ### 핵심 설계 방향
+
 - Room 기반 상태 관리 구조 설계
 - 게임 상태를 status 기반으로 분리
 - 컴포넌트 역할 분리
 - 실제 온라인 환경을 고려한 구조 설계
 - Room 상태 구조
-- type Room = {
-  id: string;
-  title: string;
-  players: Player[];
-  status: "waiting" | "countdown" | "playing" | "result" | "finished";
-  currentQuestionIndex: number;
-  quizQuestions: Question[];
-  questionStartedAt: number | null;
-  messages: ChatMessage[];
-};
 
 게임 흐름 대부분이 room 상태를 기준으로 동작하도록 설계했습니다.
 
