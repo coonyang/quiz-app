@@ -47,6 +47,7 @@ waiting
 → countdown
 → playing
 → result
+→ playing
 → finished
 
 이를 통해:
