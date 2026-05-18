@@ -80,7 +80,7 @@ export function useRoomGame({
   };
 
   const startRoomGame = (roomId: string) => {
-    socket.emit("startRoomGame", { roomId });
+    socket.emit("startRoomGame", { roomId, currentPlayerId });
   };
 
   const submitRoomAnswer = (

@@ -97,13 +97,24 @@ io.on("connection", (socket) => {
     },
   );
 
-  socket.on("startRoomGame", ({ roomId }: RoomIdPayload) => {
-    rooms = rooms.map((room) =>
-      room.id === roomId ? updateStartRoomGame(room) : room,
-    );
+  socket.on(
+    "startRoomGame",
+    ({ roomId, currentPlayerId }: PlayerRoomPayload) => {
+      const room = rooms.find((room) => room.id === roomId);
 
-    io.emit("roomsUpdated", rooms);
-  });
+      const isHost = room?.players.some(
+        (player) => player.id === currentPlayerId && player.isHost,
+      );
+
+      if (!isHost) return;
+
+      rooms = rooms.map((room) =>
+        room.id === roomId ? updateStartRoomGame(room) : room,
+      );
+
+      io.emit("roomsUpdated", rooms);
+    },
+  );
 
   socket.on(
     "submitRoomAnswer",
