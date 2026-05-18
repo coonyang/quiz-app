@@ -339,7 +339,10 @@ export default function HomeClient() {
                       currentPlayerId={currentPlayerId}
                       quizSets={allQuizSets}
                       onClose={() => setIsCreateRoomModalOpen(false)}
-                      onCreateRoom={createRoom}
+                      onCreateRoom={(room) => {
+                        createRoom(room);
+                        setIsCreateRoomModalOpen(false);
+                      }}
                     />
                   )}
                 </>
