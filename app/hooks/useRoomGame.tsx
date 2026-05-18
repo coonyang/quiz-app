@@ -4,16 +4,6 @@ import { useEffect, useState } from "react";
 
 import type { Room, ChatMessage, QuizSet } from "../types/quiz";
 
-import {
-  updateCountdownEnd,
-  updateLeaveRoom,
-  updateNextQuestion,
-  updateRestartRoomGame,
-  updateStartRoomGame,
-  updateSubmitRoomAnswer,
-  updateTimeOver,
-  updateRoomQuizSet,
-} from "../lib/room";
 import { socket } from "../lib/socket/socket";
 
 type UseRoomGameProps = {
@@ -52,14 +42,12 @@ export function useRoomGame({
 
   const roomQuizSet = (roomId: string, quizSetId: string) => {
     const selectedQuizSet = allQuizSets.find((quiz) => quiz.id === quizSetId);
-
     if (!selectedQuizSet) return;
 
-    setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId ? updateRoomQuizSet(room, selectedQuizSet) : room,
-      ),
-    );
+    socket.emit("updateRoomQuizSet", {
+      roomId,
+      quizSet: selectedQuizSet,
+    });
   };
 
   const createRoom = (room: Room) => {
@@ -79,40 +67,20 @@ export function useRoomGame({
   const leaveRoom = () => {
     if (!enteredRoomId) return;
 
-    setRooms((prev) =>
-      prev
-        .map((room) =>
-          room.id === enteredRoomId
-            ? updateLeaveRoom(room, currentPlayerId)
-            : room,
-        )
-        .filter((room) => room.players.length > 0),
-    );
-
-    setEnteredRoomId(null);
+    socket.emit("leaveRoom", {
+      roomId: enteredRoomId,
+      currentPlayerId,
+    });
   };
 
   const enteredRoom = rooms.find((room) => room.id === enteredRoomId);
 
   const sendRoomMessage = (roomId: string, message: ChatMessage) => {
-    setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId
-          ? {
-              ...room,
-              messages: [...room.messages, message],
-            }
-          : room,
-      ),
-    );
+    socket.emit("sendRoomMessage", { roomId, message });
   };
 
   const startRoomGame = (roomId: string) => {
-    setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId ? updateStartRoomGame(room) : room,
-      ),
-    );
+    socket.emit("startRoomGame", { roomId });
   };
 
   const submitRoomAnswer = (
@@ -121,43 +89,28 @@ export function useRoomGame({
     choiceIndex: number,
     timeLeft: number,
   ) => {
-    setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId
-          ? updateSubmitRoomAnswer(room, playerId, choiceIndex, timeLeft)
-          : room,
-      ),
-    );
+    socket.emit("submitRoomAnswer", {
+      roomId,
+      playerId,
+      choiceIndex,
+      timeLeft,
+    });
   };
 
   const timeOver = (roomId: string) => {
-    setRooms((prev) =>
-      prev.map((room) => (room.id === roomId ? updateTimeOver(room) : room)),
-    );
+    socket.emit("timeOver", { roomId });
   };
 
   const countdownEnd = (roomId: string) => {
-    setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId ? updateCountdownEnd(room) : room,
-      ),
-    );
+    socket.emit("countdownEnd", { roomId });
   };
 
   const restartRoomGame = (roomId: string) => {
-    setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId ? updateRestartRoomGame(room) : room,
-      ),
-    );
+    socket.emit("restartRoomGame", { roomId });
   };
 
   const nextQuestion = (roomId: string) => {
-    setRooms((prev) =>
-      prev.map((room) =>
-        room.id === roomId ? updateNextQuestion(room) : room,
-      ),
-    );
+    socket.emit("nextQuestion", { roomId });
   };
 
   return {
