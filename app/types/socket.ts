@@ -32,3 +32,15 @@ export type CreateRoomPayload = Room;
 export type RegisterPlayerPayload = {
   currentPlayerId: string;
 };
+
+export type CreateQuizSetPayload = {
+  quizSet: QuizSet;
+};
+
+export type UpdateQuizSetPayload = {
+  quizSet: QuizSet;
+};
+
+export type DeleteQuizSetPayload = {
+  quizSetId: string;
+};

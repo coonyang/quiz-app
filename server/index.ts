@@ -13,7 +13,7 @@ import {
   updateSubmitRoomAnswer,
   updateTimeOver,
 } from "../app/lib/room";
-import type { Room } from "../app/types/quiz";
+import type { Room, QuizSet } from "../app/types/quiz";
 import type {
   EnterRoomPayload,
   SendRoomMessagePayload,
@@ -23,6 +23,9 @@ import type {
   RoomIdPayload,
   CreateRoomPayload,
   RegisterPlayerPayload,
+  CreateQuizSetPayload,
+  UpdateQuizSetPayload,
+  DeleteQuizSetPayload,
 } from "../app/types/socket";
 
 const app = express();
@@ -38,10 +41,35 @@ const io = new Server(server, {
 const socketPlayerIds = new Map<string, string>();
 
 let rooms: Room[] = [];
+let sharedQuizSets: QuizSet[] = [];
 
 io.on("connection", (socket) => {
   console.log("유저 연결", socket.id);
   socket.emit("roomsUpdated", rooms);
+  socket.emit("roomsUpdated", rooms);
+  socket.emit("quizSetsUpdated", sharedQuizSets);
+
+  socket.on("createQuizSet", ({ quizSet }: CreateQuizSetPayload) => {
+    sharedQuizSets = [...sharedQuizSets, quizSet];
+
+    io.emit("quizSetsUpdated", sharedQuizSets);
+  });
+
+  socket.on("updateQuizSet", ({ quizSet }: UpdateQuizSetPayload) => {
+    sharedQuizSets = sharedQuizSets.map((item) =>
+      item.id === quizSet.id ? quizSet : item,
+    );
+
+    io.emit("quizSetsUpdated", sharedQuizSets);
+  });
+
+  socket.on("deleteQuizSet", ({ quizSetId }: DeleteQuizSetPayload) => {
+    sharedQuizSets = sharedQuizSets.filter(
+      (quizSet) => quizSet.id !== quizSetId,
+    );
+
+    io.emit("quizSetsUpdated", sharedQuizSets);
+  });
 
   socket.on("registerPlayer", ({ currentPlayerId }: RegisterPlayerPayload) => {
     socketPlayerIds.set(socket.id, currentPlayerId);

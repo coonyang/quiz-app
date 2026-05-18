@@ -46,14 +46,17 @@ export default function HomeClient() {
       ? allQuizSets
       : allQuizSets.filter((item) => item.category === selectedCategory);
 
-  /* localStorage에 저장된 데이터 불러오기 */
   useEffect(() => {
-    const savedCustomQuizSets = localStorage.getItem("customQuizSets");
+    socket.on("quizSetsUpdated", (quizSets: QuizSet[]) => {
+      setCustomQuizSets(quizSets);
+    });
 
-    if (savedCustomQuizSets) {
-      setCustomQuizSets(JSON.parse(savedCustomQuizSets));
-    }
+    return () => {
+      socket.off("quizSetsUpdated");
+    };
   }, []);
+
+  /* localStorage에 저장된 데이터 불러오기 */
 
   useEffect(() => {
     const savedPlayerId = sessionStorage.getItem("currentPlayerId");
@@ -132,10 +135,9 @@ export default function HomeClient() {
   };
 
   const createQuizSet = (newQuizSet: QuizSet) => {
-    const nextCustomQuizSets = [...customQuizSets, newQuizSet];
-
-    setCustomQuizSets(nextCustomQuizSets);
-    localStorage.setItem("customQuizSets", JSON.stringify(nextCustomQuizSets));
+    socket.emit("createQuizSet", {
+      quizSet: newQuizSet,
+    });
 
     setSelectedCategory(newQuizSet.category);
     setSelectedQuizSetId(newQuizSet.id);
@@ -143,23 +145,17 @@ export default function HomeClient() {
   };
 
   const updateQuizSet = (updatedQuizSet: QuizSet) => {
-    const nextCustomQuizSets = customQuizSets.map((quizSet) =>
-      quizSet.id === updatedQuizSet.id ? updatedQuizSet : quizSet,
-    );
-
-    setCustomQuizSets(nextCustomQuizSets);
-    localStorage.setItem("customQuizSets", JSON.stringify(nextCustomQuizSets));
+    socket.emit("updateQuizSet", {
+      quizSet: updatedQuizSet,
+    });
 
     setEditingQuizSet(null);
   };
 
   const deleteCustomQuizSet = (quizSetId: string) => {
-    const nextCustomQuizSets = customQuizSets.filter(
-      (quizSet) => quizSet.id !== quizSetId,
-    );
-
-    setCustomQuizSets(nextCustomQuizSets);
-    localStorage.setItem("customQuizSets", JSON.stringify(nextCustomQuizSets));
+    socket.emit("deleteQuizSet", {
+      quizSetId,
+    });
 
     if (selectedQuizSetId === quizSetId) {
       setSelectedQuizSetId("");
