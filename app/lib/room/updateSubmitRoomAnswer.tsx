@@ -24,6 +24,7 @@ export function updateSubmitRoomAnswer(
       ...player,
       score: isCorrect ? player.score + 100 + timeLeft : player.score,
       answeredQuestionIndex: room.currentQuestionIndex,
+      isLastAnswerCorrect: isCorrect,
     };
   });
 

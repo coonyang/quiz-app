@@ -348,10 +348,10 @@ export default function RoomScreen({
                     <p className="font-semibold">
                       {player.nickname}
                       {player.id === currentPlayerId ? " (나)" : ""}
-                      {player.answeredQuestionIndex ==
-                        room.currentQuestionIndex && room.status == "playing"
-                        ? "✅"
-                        : ""}
+                      {player.answeredQuestionIndex ===
+                        room.currentQuestionIndex &&
+                        room.status === "playing" &&
+                        (player.isLastAnswerCorrect ? "✅" : "❌")}
                     </p>
                     <p className="text-sm text-gray-500">
                       {player.isHost ? "방장" : "참가자"}

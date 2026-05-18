@@ -39,6 +39,7 @@ export type Player = {
   isHost: boolean;
   score: number;
   answeredQuestionIndex?: number | undefined;
+  isLastAnswerCorrect?: boolean | undefined;
 };
 
 export type Room = {
