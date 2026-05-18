@@ -1,6 +1,7 @@
 import express from "express";
 import http from "http";
-
+import "dotenv/config";
+import { createClient } from "@supabase/supabase-js";
 import { Server } from "socket.io";
 import {
   updateCountdownEnd,
@@ -40,8 +41,37 @@ const io = new Server(server, {
 
 const socketPlayerIds = new Map<string, string>();
 
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  throw new Error("Missing Supabase environment variables");
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+
 let rooms: Room[] = [];
 let sharedQuizSets: QuizSet[] = [];
+
+async function loadQuizSets() {
+  const { data, error } = await supabase
+    .from("quiz_sets")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  sharedQuizSets = data.map((quizSet) => ({
+    id: quizSet.id,
+    title: quizSet.title,
+    category: quizSet.category,
+    author: quizSet.author,
+    authorId: quizSet.author_id,
+    questions: quizSet.questions,
+  }));
+}
 
 io.on("connection", (socket) => {
   console.log("유저 연결", socket.id);
@@ -236,6 +266,8 @@ io.on("connection", (socket) => {
     console.log("연결 종료", socket.id);
   });
 });
-server.listen(4000, () => {
-  console.log("socket server running");
+loadQuizSets().then(() => {
+  server.listen(4000, () => {
+    console.log("socket server running");
+  });
 });
