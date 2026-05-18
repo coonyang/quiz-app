@@ -24,8 +24,12 @@ export function useSoloQuiz({ selectedQuizSet }: UseSoloQuizProps) {
 
   const startQuiz = () => {
     if (!selectedQuizSet) return;
+    const shuffledQuestions = [...selectedQuizSet.questions]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 10);
 
-    setQuizQuestions(selectedQuizSet.questions);
+    setQuizQuestions(shuffledQuestions);
+
     setCurrentIndex(0);
     setScore(0);
     setAnswers([]);
