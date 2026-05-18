@@ -30,12 +30,7 @@ export function updateTimeOver(room: Room): Room {
 
   return {
     ...room,
-    players: updatedPlayers.map((player) => ({
-      ...player,
-      answeredQuestionIndex: undefined,
-      isLastAnswerCorrect: undefined,
-    })),
-    currentQuestionIndex: room.currentQuestionIndex + 1,
-    questionStartedAt: Date.now(),
+    players: updatedPlayers,
+    status: "result",
   };
 }
