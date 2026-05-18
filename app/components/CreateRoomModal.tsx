@@ -23,6 +23,17 @@ export default function CreateRoomModal({
   const [quizSetId, setQuizSetId] = useState("");
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("전체");
+
+  const categories = [
+    "전체",
+    ...new Set(quizSets.map((quizSet) => quizSet.category)),
+  ];
+
+  const visibleQuizSets =
+    selectedCategory === "전체"
+      ? quizSets
+      : quizSets.filter((quizSet) => quizSet.category === selectedCategory);
   const createRoom = () => {
     if (!title.trim()) {
       setErrorMessage("방 제목을 입력해주세요.");
@@ -75,7 +86,20 @@ export default function CreateRoomModal({
             placeholder="방 제목"
             className="rounded-md border px-4 py-2"
           />
-
+          <select
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setQuizSetId("");
+            }}
+            className="rounded-md border px-4 py-2"
+          >
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
           <select
             value={quizSetId}
             onChange={(e) => setQuizSetId(e.target.value)}
@@ -83,7 +107,7 @@ export default function CreateRoomModal({
           >
             <option value="">문제집을 선택하세요</option>
 
-            {quizSets.map((quizSet) => (
+            {visibleQuizSets.map((quizSet) => (
               <option key={quizSet.id} value={quizSet.id}>
                 {quizSet.title} · {quizSet.category}
               </option>
