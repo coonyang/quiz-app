@@ -33,9 +33,13 @@ const app = express();
 
 const server = http.createServer(app);
 
+const clientOrigins = (process.env.CLIENT_ORIGINS ?? "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim());
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: clientOrigins,
   },
 });
 
@@ -327,8 +331,10 @@ io.on("connection", (socket) => {
     console.log("연결 종료", socket.id);
   });
 });
+const port = Number(process.env.PORT ?? 4000);
+
 loadQuizSets().then(() => {
-  server.listen(4000, () => {
-    console.log("socket server running");
+  server.listen(port, () => {
+    console.log(`socket server running on ${port}`);
   });
 });
