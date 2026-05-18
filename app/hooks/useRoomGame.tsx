@@ -40,6 +40,14 @@ export function useRoomGame({
     };
   }, [currentPlayerId]);
 
+  useEffect(() => {
+    if (!currentPlayerId) return;
+
+    socket.emit("registerPlayer", {
+      currentPlayerId,
+    });
+  }, [currentPlayerId]);
+
   const roomQuizSet = (roomId: string, quizSetId: string) => {
     const selectedQuizSet = allQuizSets.find((quiz) => quiz.id === quizSetId);
     if (!selectedQuizSet) return;

@@ -22,6 +22,7 @@ import type {
   PlayerRoomPayload,
   RoomIdPayload,
   CreateRoomPayload,
+  RegisterPlayerPayload,
 } from "../app/types/socket";
 
 const app = express();
@@ -34,11 +35,17 @@ const io = new Server(server, {
   },
 });
 
+const socketPlayerIds = new Map<string, string>();
+
 let rooms: Room[] = [];
 
 io.on("connection", (socket) => {
   console.log("유저 연결", socket.id);
   socket.emit("roomsUpdated", rooms);
+
+  socket.on("registerPlayer", ({ currentPlayerId }: RegisterPlayerPayload) => {
+    socketPlayerIds.set(socket.id, currentPlayerId);
+  });
 
   socket.on("createRoom", (room: CreateRoomPayload) => {
     rooms.unshift(room);
@@ -180,6 +187,25 @@ io.on("connection", (socket) => {
   );
 
   socket.on("disconnect", () => {
+    const currentPlayerId = socketPlayerIds.get(socket.id);
+
+    if (!currentPlayerId) {
+      console.log("연결 종료", socket.id);
+      return;
+    }
+
+    rooms = rooms
+      .map((room) =>
+        room.players.some((player) => player.id === currentPlayerId)
+          ? updateLeaveRoom(room, currentPlayerId)
+          : room,
+      )
+      .filter((room) => room.players.length > 0);
+
+    socketPlayerIds.delete(socket.id);
+
+    io.emit("roomsUpdated", rooms);
+
     console.log("연결 종료", socket.id);
   });
 });

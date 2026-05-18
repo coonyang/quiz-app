@@ -28,3 +28,7 @@ export type SubmitRoomAnswerPayload = RoomIdPayload & {
 };
 
 export type CreateRoomPayload = Room;
+
+export type RegisterPlayerPayload = {
+  currentPlayerId: string;
+};
