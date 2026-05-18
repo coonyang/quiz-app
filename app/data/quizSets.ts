@@ -1,6 +1,21 @@
 export const quizSets = [
   {
     id: "math-basic",
+    title: "과학 기초",
+    category: "과학",
+    author: "관리자",
+    authorId: "system",
+    questions: [
+      {
+        id: 1,
+        question: "2 + 3은?",
+        choices: ["4", "5", "6", "7"],
+        answerIndex: 1,
+      },
+    ],
+  },
+  {
+    id: "math-basic",
     title: "수학 기초",
     category: "수학",
     author: "관리자",
@@ -35,6 +50,21 @@ export const quizSets = [
       },
       {
         id: 3,
+        question: "2 + 3은?",
+        choices: ["4", "5", "6", "7"],
+        answerIndex: 1,
+      },
+    ],
+  },
+  {
+    id: "math-basic",
+    title: "기타",
+    category: "기타",
+    author: "관리자",
+    authorId: "system",
+    questions: [
+      {
+        id: 1,
         question: "2 + 3은?",
         choices: ["4", "5", "6", "7"],
         answerIndex: 1,
