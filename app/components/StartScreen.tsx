@@ -9,7 +9,6 @@ type StartScreenProps = {
   onSelectQuizSet: (quizSetId: string) => void;
   onStartQuiz: () => void;
   nickname: string;
-  onChangeNickname: (nickname: string) => void;
   customQuizSets: QuizSet[];
   onDeleteQuizSet: (quizSetId: string) => void;
   onEditQuizSet: (quizSet: QuizSet) => void;
@@ -24,7 +23,6 @@ export default function StartScreen({
   onSelectQuizSet,
   onStartQuiz,
   nickname,
-  onChangeNickname,
   customQuizSets,
   onDeleteQuizSet,
   onEditQuizSet,
@@ -32,12 +30,6 @@ export default function StartScreen({
 }: StartScreenProps) {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6">
-      <input
-        value={nickname}
-        onChange={(event) => onChangeNickname(event.target.value)}
-        placeholder="닉네임을 입력하세요"
-        className="rounded-md border px-4 py-2"
-      />
       <h1 className="mt-2 text-3xl font-bold">퀴즈 목록</h1>
 
       <div className="rounded-lg border p-5">

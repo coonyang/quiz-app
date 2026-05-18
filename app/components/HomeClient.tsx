@@ -9,7 +9,7 @@ import RoomScreen from "./RoomScreen";
 import StartScreen from "./StartScreen";
 import { quizSets } from "../data/quizSets";
 import { useEffect, useState } from "react";
-import type { RankingRecord, Question, QuizSet } from "../types/quiz";
+import type { RankingRecord, QuizSet } from "../types/quiz";
 
 import { useRoomGame } from "../hooks/useRoomGame";
 import { useSoloQuiz } from "../hooks/useSoloQuiz";
@@ -17,6 +17,8 @@ import { socket } from "../lib/socket/socket";
 export default function HomeClient() {
   /* 유저와 문제집 상태 */
   const [nickname, setNickname] = useState("");
+  const [isNicknameModalOpen, setIsNicknameModalOpen] = useState(false);
+  const [nicknameInput, setNicknameInput] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [selectedQuizSetId, setSelectedQuizSetId] = useState("");
   const [customQuizSets, setCustomQuizSets] = useState<QuizSet[]>([]);
@@ -29,17 +31,7 @@ export default function HomeClient() {
   /* 온라인 방 상태 */
   const [playMode, setPlayMode] = useState<"solo" | "online">("solo");
   const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
-  const [currentPlayerId] = useState(() => {
-    const savedPlayerId = localStorage.getItem("currentPlayerId");
-
-    if (savedPlayerId) {
-      return savedPlayerId;
-    }
-
-    const newPlayerId = crypto.randomUUID();
-    localStorage.setItem("currentPlayerId", newPlayerId);
-    return newPlayerId;
-  });
+  const [currentPlayerId, setCurrentPlayerId] = useState("");
 
   /* 화면에서 바로 계산해서 쓰는 데이터 */
   const allQuizSets = [...quizSets, ...customQuizSets];
@@ -64,11 +56,28 @@ export default function HomeClient() {
   }, []);
 
   useEffect(() => {
+    const savedPlayerId = localStorage.getItem("currentPlayerId");
+
+    if (savedPlayerId) {
+      setCurrentPlayerId(savedPlayerId);
+      return;
+    }
+
+    const newPlayerId = crypto.randomUUID();
+    localStorage.setItem("currentPlayerId", newPlayerId);
+    setCurrentPlayerId(newPlayerId);
+  }, []);
+
+  useEffect(() => {
     const savedNickname = localStorage.getItem("nickname");
 
     if (savedNickname) {
       setNickname(savedNickname);
+      setNicknameInput(savedNickname);
+      return;
     }
+
+    setIsNicknameModalOpen(true);
   }, []);
 
   useEffect(() => {
@@ -78,6 +87,16 @@ export default function HomeClient() {
       setRankings(JSON.parse(savedRankings));
     }
   }, []);
+
+  const saveNickname = () => {
+    const nextNickname = nicknameInput.trim();
+
+    if (!nextNickname) return;
+
+    setNickname(nextNickname);
+    localStorage.setItem("nickname", nextNickname);
+    setIsNicknameModalOpen(false);
+  };
 
   /* 온라인 방 관련 함수 */
   const {
@@ -186,9 +205,62 @@ export default function HomeClient() {
     };
   }, []);
 
+  if (!currentPlayerId) {
+    return null;
+  }
   return (
     <main className="min-h-screen px-4 py-4">
       <div className="mx-auto max-w-6xl">
+        {isNicknameModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <section className="w-full max-w-sm rounded-lg bg-white p-6 text-black">
+              <h2 className="text-xl font-bold">
+                {nickname ? "닉네임 변경" : "닉네임 입력"}
+              </h2>
+
+              <input
+                value={nicknameInput}
+                onChange={(event) => setNicknameInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    saveNickname();
+                  }
+                }}
+                placeholder="닉네임"
+                className="mt-4 w-full rounded-md border px-4 py-2"
+                autoFocus
+              />
+
+              <button
+                onClick={saveNickname}
+                disabled={!nicknameInput.trim()}
+                className="mt-4 w-full rounded-md bg-black px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                시작하기
+              </button>
+            </section>
+          </div>
+        )}
+        {nickname && !enteredRoomId && (
+          <div className="mb-4 flex justify-end">
+            <div className="flex items-center gap-2 rounded-md border bg-white px-3 py-2 text-sm">
+              <span className="text-gray-500">닉네임</span>
+              <span className="font-semibold">{nickname}</span>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setNicknameInput(nickname);
+                  setIsNicknameModalOpen(true);
+                }}
+                className="ml-2 rounded-md border px-2 py-1 text-xs hover:bg-gray-100"
+              >
+                변경
+              </button>
+            </div>
+          </div>
+        )}
+
         <section className="min-w-0">
           {!currentQuestion && !isQuizFinished && (
             <>
@@ -229,7 +301,6 @@ export default function HomeClient() {
                     onSelectQuizSet={setSelectedQuizSetId}
                     onStartQuiz={startQuiz}
                     nickname={nickname}
-                    onChangeNickname={setNickname}
                     customQuizSets={customQuizSets}
                     onDeleteQuizSet={deleteCustomQuizSet}
                     onEditQuizSet={setEditingQuizSet}
