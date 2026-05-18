@@ -259,7 +259,7 @@ export default function RoomScreen({
                 <p>
                   {room.currentQuestionIndex + 1} / {room.quizQuestions.length}
                 </p>
-                <h2 className="break-all text-3xl font-bold text-center">
+                <h2 className="break-all text-2xl font-bold text-center">
                   {currentQuestion.question}
                 </h2>
               </div>
