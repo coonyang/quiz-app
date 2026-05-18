@@ -39,8 +39,10 @@ export type CreateQuizSetPayload = {
 
 export type UpdateQuizSetPayload = {
   quizSet: QuizSet;
+  currentPlayerId: string;
 };
 
 export type DeleteQuizSetPayload = {
   quizSetId: string;
+  currentPlayerId: string;
 };

@@ -98,48 +98,68 @@ io.on("connection", (socket) => {
     io.emit("quizSetsUpdated", sharedQuizSets);
   });
 
-  socket.on("updateQuizSet", async ({ quizSet }: UpdateQuizSetPayload) => {
-    const { error } = await supabase
-      .from("quiz_sets")
-      .update({
-        title: quizSet.title,
-        category: quizSet.category,
-        author: quizSet.author,
-        author_id: quizSet.authorId,
-        questions: quizSet.questions,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", quizSet.id);
+  socket.on(
+    "updateQuizSet",
+    async ({ quizSet, currentPlayerId }: UpdateQuizSetPayload) => {
+      const targetQuizSet = sharedQuizSets.find(
+        (item) => item.id === quizSet.id,
+      );
 
-    if (error) {
-      console.error(error);
-      return;
-    }
+      if (targetQuizSet?.authorId !== currentPlayerId) {
+        return;
+      }
+      const { error } = await supabase
+        .from("quiz_sets")
+        .update({
+          title: quizSet.title,
+          category: quizSet.category,
+          author: quizSet.author,
+          author_id: quizSet.authorId,
+          questions: quizSet.questions,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", quizSet.id);
 
-    sharedQuizSets = sharedQuizSets.map((item) =>
-      item.id === quizSet.id ? quizSet : item,
-    );
+      if (error) {
+        console.error(error);
+        return;
+      }
 
-    io.emit("quizSetsUpdated", sharedQuizSets);
-  });
+      sharedQuizSets = sharedQuizSets.map((item) =>
+        item.id === quizSet.id ? quizSet : item,
+      );
 
-  socket.on("deleteQuizSet", async ({ quizSetId }: DeleteQuizSetPayload) => {
-    const { error } = await supabase
-      .from("quiz_sets")
-      .delete()
-      .eq("id", quizSetId);
+      io.emit("quizSetsUpdated", sharedQuizSets);
+    },
+  );
 
-    if (error) {
-      console.error(error);
-      return;
-    }
+  socket.on(
+    "deleteQuizSet",
+    async ({ quizSetId, currentPlayerId }: DeleteQuizSetPayload) => {
+      const targetQuizSet = sharedQuizSets.find(
+        (quizSet) => quizSet.id === quizSetId,
+      );
 
-    sharedQuizSets = sharedQuizSets.filter(
-      (quizSet) => quizSet.id !== quizSetId,
-    );
+      if (targetQuizSet?.authorId !== currentPlayerId) {
+        return;
+      }
+      const { error } = await supabase
+        .from("quiz_sets")
+        .delete()
+        .eq("id", quizSetId);
 
-    io.emit("quizSetsUpdated", sharedQuizSets);
-  });
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      sharedQuizSets = sharedQuizSets.filter(
+        (quizSet) => quizSet.id !== quizSetId,
+      );
+
+      io.emit("quizSetsUpdated", sharedQuizSets);
+    },
+  );
 
   socket.on("registerPlayer", ({ currentPlayerId }: RegisterPlayerPayload) => {
     socketPlayerIds.set(socket.id, currentPlayerId);

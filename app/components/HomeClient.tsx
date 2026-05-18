@@ -147,6 +147,7 @@ export default function HomeClient() {
   const updateQuizSet = (updatedQuizSet: QuizSet) => {
     socket.emit("updateQuizSet", {
       quizSet: updatedQuizSet,
+      currentPlayerId,
     });
 
     setEditingQuizSet(null);
@@ -155,6 +156,7 @@ export default function HomeClient() {
   const deleteCustomQuizSet = (quizSetId: string) => {
     socket.emit("deleteQuizSet", {
       quizSetId,
+      currentPlayerId,
     });
 
     if (selectedQuizSetId === quizSetId) {
