@@ -43,6 +43,20 @@ export default function RoomScreen({
   const [now, setNow] = useState(0);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [resultCountdown, setResultCountdown] = useState<number | null>(null);
+  const [selectedQuizSetCategory, setSelectedQuizSetCategory] =
+    useState("전체");
+
+  const quizSetCategories = [
+    "전체",
+    ...new Set(quizSets.map((quizSet) => quizSet.category)),
+  ];
+
+  const visibleQuizSets =
+    selectedQuizSetCategory === "전체"
+      ? quizSets
+      : quizSets.filter(
+          (quizSet) => quizSet.category === selectedQuizSetCategory,
+        );
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const remainingMs = room.questionStartedAt
     ? room.timeLimit * 1000 - (now - room.questionStartedAt)
@@ -157,24 +171,41 @@ export default function RoomScreen({
             <div>
               <p className="text-sm text-gray-500">room id:{room.id}</p>
               <h1 className="text-2xl font-bold">{room.title}</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <div className="mt-1 text-sm text-gray-500">
                 {isHost && room.status === "waiting" ? (
-                  <select
-                    value={room.quizSetId}
-                    onChange={(e) => {
-                      onUpdateRoomQuizSet(room.id, e.target.value);
-                    }}
-                  >
-                    {quizSets.map((quizSet) => (
-                      <option key={quizSet.id} value={quizSet.id}>
-                        {quizSet.title} · {quizSet.category}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="mt-1 flex gap-2">
+                    <select
+                      value={selectedQuizSetCategory}
+                      onChange={(e) => {
+                        setSelectedQuizSetCategory(e.target.value);
+                      }}
+                      className="rounded-md border px-2 py-1 "
+                    >
+                      {quizSetCategories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={room.quizSetId}
+                      onChange={(e) => {
+                        onUpdateRoomQuizSet(room.id, e.target.value);
+                      }}
+                      className=" rounded-md border px-2 py-1 "
+                    >
+                      {visibleQuizSets.map((quizSet) => (
+                        <option key={quizSet.id} value={quizSet.id}>
+                          {quizSet.title} · {quizSet.category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 ) : (
                   `문제집: ${room.quizSetTitle}`
                 )}
-              </p>
+              </div>
             </div>
 
             <button
