@@ -17,7 +17,7 @@ export type SendRoomMessagePayload = RoomIdPayload & {
   message: ChatMessage;
 };
 
-export type UpdateRoomQuizSetPayload = RoomIdPayload & {
+export type UpdateRoomQuizSetPayload = PlayerRoomPayload & {
   quizSet: QuizSet;
 };
 

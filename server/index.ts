@@ -88,7 +88,15 @@ io.on("connection", (socket) => {
 
   socket.on(
     "updateRoomQuizSet",
-    ({ roomId, quizSet }: UpdateRoomQuizSetPayload) => {
+    ({ roomId, quizSet, currentPlayerId }: UpdateRoomQuizSetPayload) => {
+      const room = rooms.find((room) => room.id === roomId);
+
+      const isHost = room?.players.some(
+        (player) => player.id === currentPlayerId && player.isHost,
+      );
+
+      if (!isHost) return;
+
       rooms = rooms.map((room) =>
         room.id === roomId ? updateRoomQuizSet(room, quizSet) : room,
       );

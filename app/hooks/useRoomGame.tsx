@@ -47,6 +47,7 @@ export function useRoomGame({
     socket.emit("updateRoomQuizSet", {
       roomId,
       quizSet: selectedQuizSet,
+      currentPlayerId,
     });
   };
 
