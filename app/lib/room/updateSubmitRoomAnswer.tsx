@@ -46,11 +46,7 @@ export function updateSubmitRoomAnswer(
   if (allAnswered) {
     return {
       ...room,
-      questionStartedAt: Date.now(),
-      players: updatedPlayers.map((player) => ({
-        ...player,
-        answeredQuestionIndex: undefined,
-      })),
+      players: updatedPlayers,
       status: "result",
     };
   }

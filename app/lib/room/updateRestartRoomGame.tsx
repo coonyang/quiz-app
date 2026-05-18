@@ -12,6 +12,7 @@ export function updateRestartRoomGame(room: Room): Room {
       ...player,
       score: 0,
       answeredQuestionIndex: undefined,
+      isLastAnswerCorrect: undefined,
     })),
   };
 }

@@ -350,7 +350,8 @@ export default function RoomScreen({
                       {player.id === currentPlayerId ? " (나)" : ""}
                       {player.answeredQuestionIndex ===
                         room.currentQuestionIndex &&
-                        room.status === "playing" &&
+                        (room.status === "playing" ||
+                          room.status === "result") &&
                         (player.isLastAnswerCorrect ? "✅" : "❌")}
                     </p>
                     <p className="text-sm text-gray-500">
