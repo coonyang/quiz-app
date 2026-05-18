@@ -190,8 +190,6 @@ export default function HomeClient() {
 
     nickname,
 
-    rankings,
-
     setRankings,
   });
 

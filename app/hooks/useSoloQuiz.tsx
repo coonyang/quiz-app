@@ -7,14 +7,14 @@ import type { Question, QuizSet, RankingRecord } from "../types/quiz";
 type UseSoloQuizProps = {
   selectedQuizSet: QuizSet | undefined;
   nickname: string;
-  rankings: RankingRecord[];
+
   setRankings: React.Dispatch<React.SetStateAction<RankingRecord[]>>;
 };
 
 export function useSoloQuiz({
   selectedQuizSet,
   nickname,
-  rankings,
+
   setRankings,
 }: UseSoloQuizProps) {
   const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
