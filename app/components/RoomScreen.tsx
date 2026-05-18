@@ -270,12 +270,14 @@ export default function RoomScreen({
             <div>
               <div className="flex justify-between">
                 <h3 className="text-xl font-bold">최종 순위</h3>
-                <button
-                  className=" rounded border p-2 mr-2 hover:bg-gray-100"
-                  onClick={() => onRestartRoomGame(room.id)}
-                >
-                  다시하기
-                </button>
+                {isHost && (
+                  <button
+                    className=" rounded border p-2 mr-2 hover:bg-gray-100"
+                    onClick={() => onRestartRoomGame(room.id)}
+                  >
+                    다시하기
+                  </button>
+                )}
               </div>
               <div className="mt-3 grid max-h-[285px] gap-2 overflow-y-auto pr-2">
                 {sortedPlayers.map((player, index) => (
