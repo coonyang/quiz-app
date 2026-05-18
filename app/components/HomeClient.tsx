@@ -29,7 +29,17 @@ export default function HomeClient() {
   /* 온라인 방 상태 */
   const [playMode, setPlayMode] = useState<"solo" | "online">("solo");
   const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState(false);
-  const [currentPlayerId] = useState(() => crypto.randomUUID());
+  const [currentPlayerId] = useState(() => {
+    const savedPlayerId = localStorage.getItem("currentPlayerId");
+
+    if (savedPlayerId) {
+      return savedPlayerId;
+    }
+
+    const newPlayerId = crypto.randomUUID();
+    localStorage.setItem("currentPlayerId", newPlayerId);
+    return newPlayerId;
+  });
 
   /* 화면에서 바로 계산해서 쓰는 데이터 */
   const allQuizSets = [...quizSets, ...customQuizSets];
