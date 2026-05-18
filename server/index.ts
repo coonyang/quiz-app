@@ -331,10 +331,39 @@ io.on("connection", (socket) => {
     console.log("연결 종료", socket.id);
   });
 });
+
+function subscribeToQuizSetsChanges() {
+  supabase
+    .channel("schema-db-changes")
+    .on(
+      "postgres_changes",
+      { event: "DELETE", schema: "public", table: "quiz_sets" },
+      (payload) => {
+        console.log("DB에서 문제집 삭제 감지:", payload.old.id);
+
+        // 1. 소켓 서버의 인메모리 데이터 갱신
+        sharedQuizSets = sharedQuizSets.filter(
+          (quizSet) => quizSet.id !== payload.old.id,
+        );
+
+        // 2. 연결된 모든 클라이언트에게 실시간 전파
+        io.emit("quizSetsUpdated", sharedQuizSets);
+      },
+    )
+
+    .subscribe();
+}
+
 const port = Number(process.env.PORT ?? 4000);
 
-loadQuizSets().then(() => {
-  server.listen(port, () => {
-    console.log(`socket server running on ${port}`);
+// DB 로드 후 서버 시작 및 실시간 구독 활성화
+loadQuizSets()
+  .then(() => {
+    subscribeToQuizSetsChanges();
+    server.listen(port, () => {
+      console.log(`socket server running on ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error("초기 데이터 로드 실패:", err);
   });
-});
