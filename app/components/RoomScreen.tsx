@@ -40,7 +40,7 @@ export default function RoomScreen({
   onUpdateRoomQuizSet,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [resultCountdown, setResultCountdown] = useState<number | null>(null);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
@@ -68,7 +68,7 @@ export default function RoomScreen({
 
   useEffect(() => {
     if (room.status !== "playing") return;
-    setNow(Date.now());
+
     const timerId = setInterval(() => {
       setNow(Date.now());
     }, 1000);
@@ -84,8 +84,6 @@ export default function RoomScreen({
 
   useEffect(() => {
     if (room.status !== "countdown") return;
-
-    setCountdown(3);
 
     const timerId = setInterval(() => {
       setCountdown((prev) => {
@@ -103,14 +101,14 @@ export default function RoomScreen({
     if (countdown !== null && countdown <= 0) {
       onCountdownEnd(room.id);
     }
-  }, [countdown, room.status]);
+  }, [countdown, room.status, room.id, onCountdownEnd]);
 
   useEffect(() => {
     if (room.status !== "result") return;
-    setResultCountdown(2);
+
     const timerId = setInterval(() => {
       setResultCountdown((prev) => {
-        if (prev === null) return 2;
+        if (prev === null) return 1;
         return prev - 1;
       });
     }, 1000);
@@ -124,7 +122,7 @@ export default function RoomScreen({
     if (resultCountdown !== null && resultCountdown <= 0) {
       onNextQuestion(room.id);
     }
-  }, [resultCountdown, room.status]);
+  }, [resultCountdown, room.status, room.id, onNextQuestion]);
 
   const sendMessage = () => {
     if (!messageText.trim()) return;
@@ -209,7 +207,7 @@ export default function RoomScreen({
           )}
           {room.status === "countdown" && (
             <div className="flex flex-1 flex-col items-center justify-center">
-              {countdown}
+              {countdown ?? "잠시 후 게임이 시작됩니다..."}
             </div>
           )}
           {room.status === "playing" && (
@@ -264,7 +262,7 @@ export default function RoomScreen({
             </>
           )}
           {room.status === "result" && (
-            <p>{resultCountdown}초 뒤 다음 문제로 넘어갑니다...</p>
+            <p>{resultCountdown ?? 2}초 후 다음 문제로 넘어갑니다...</p>
           )}
           {room.status === "finished" && (
             <div>
