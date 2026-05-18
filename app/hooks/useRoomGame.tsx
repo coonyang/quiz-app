@@ -106,7 +106,7 @@ export function useRoomGame({
   };
 
   const restartRoomGame = (roomId: string) => {
-    socket.emit("restartRoomGame", { roomId });
+    socket.emit("restartRoomGame", { roomId, currentPlayerId });
   };
 
   const nextQuestion = (roomId: string) => {

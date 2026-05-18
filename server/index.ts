@@ -153,13 +153,23 @@ io.on("connection", (socket) => {
     io.emit("roomsUpdated", rooms);
   });
 
-  socket.on("restartRoomGame", ({ roomId }: RoomIdPayload) => {
-    rooms = rooms.map((room) =>
-      room.id === roomId ? updateRestartRoomGame(room) : room,
-    );
+  socket.on(
+    "restartRoomGame",
+    ({ roomId, currentPlayerId }: PlayerRoomPayload) => {
+      const room = rooms.find((room) => room.id === roomId);
+      const isHost = room?.players.some(
+        (player) => player.id === currentPlayerId && player.isHost,
+      );
 
-    io.emit("roomsUpdated", rooms);
-  });
+      if (!isHost) return;
+
+      rooms = rooms.map((room) =>
+        room.id === roomId ? updateRestartRoomGame(room) : room,
+      );
+
+      io.emit("roomsUpdated", rooms);
+    },
+  );
 
   socket.on("disconnect", () => {
     console.log("연결 종료", socket.id);
