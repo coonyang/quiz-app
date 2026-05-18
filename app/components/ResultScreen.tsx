@@ -1,4 +1,4 @@
-import type { Question, RankingRecord } from "../types/quiz";
+import type { Question } from "../types/quiz";
 
 type ResultScreenProps = {
   quizQuestions: Question[];
@@ -8,8 +8,6 @@ type ResultScreenProps = {
   startTime: number | null;
   finishTime: number | null;
   correctCount: number;
-  rankings: RankingRecord[];
-  selectedQuizSetId: string;
   onGoHome: () => void;
 };
 
@@ -21,15 +19,10 @@ export default function ResultScreen({
   startTime,
   finishTime,
   correctCount,
-  rankings,
-  selectedQuizSetId,
   onGoHome,
 }: ResultScreenProps) {
   const elapsedSeconds =
     startTime && finishTime ? Math.floor((finishTime - startTime) / 1000) : 0;
-  const visibleRankings = rankings.filter(
-    (ranking) => ranking.quizSetId === selectedQuizSetId,
-  );
 
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6 text-center">
@@ -42,10 +35,11 @@ export default function ResultScreen({
       {quizQuestions.map((question, index) => {
         const userAnswer = answers[index];
         const isCorrect = userAnswer === question.answerIndex;
+
         return (
           <div key={question.id} className="rounded-lg border p-4 text-left">
             <div className="flex justify-between">
-              <p className="font-semibold">{question.question} </p>
+              <p className="font-semibold">{question.question}</p>
 
               <p className={isCorrect ? "text-emerald-600" : "text-red-600"}>
                 {isCorrect ? "정답" : "오답"}
@@ -68,23 +62,6 @@ export default function ResultScreen({
       >
         홈으로 돌아가기
       </button>
-      <h3 className="text-2xl font-bold">랭킹</h3>
-
-      {visibleRankings.map((ranking, index) => (
-        <div key={ranking.id} className="rounded-lg border p-4 text-left">
-          <p>
-            {index + 1}. {ranking.nickname}
-          </p>
-          <p>점수: {ranking.score}점</p>
-          <p>
-            정답: {ranking.correctCount} / {ranking.totalQuestions}
-          </p>
-          <p>시간: {ranking.elapsedSeconds}초</p>
-        </div>
-      ))}
-      {visibleRankings.length === 0 && (
-        <p className="text-sm text-gray-500">아직 랭킹이 없습니다.</p>
-      )}
     </section>
   );
 }
