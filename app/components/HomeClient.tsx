@@ -80,6 +80,16 @@ export default function HomeClient() {
     setIsNicknameModalOpen(true);
   }, []);
 
+  useEffect(() => {
+    const exists = visibleQuizSets.some(
+      (quizSet) => quizSet.id === selectedQuizSetId,
+    );
+
+    if (!exists) {
+      setSelectedQuizSetId("");
+    }
+  }, [visibleQuizSets, selectedQuizSetId]);
+
   const saveNickname = () => {
     const nextNickname = nicknameInput.trim();
 
