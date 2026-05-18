@@ -39,7 +39,9 @@ export function updateCreateRoom(
 
     status: "waiting",
     currentQuestionIndex: 0,
-    quizQuestions: selectedQuizSet.questions,
+    quizQuestions: [...selectedQuizSet.questions]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 10),
     questionStartedAt: null,
     timeLimit: 30,
   };
