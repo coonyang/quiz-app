@@ -1,6 +1,7 @@
 import type { Room, ChatMessage } from "@/app/types/quiz";
 
 export function updateStartRoomGame(room: Room): Room {
+  if (room.status !== "waiting") return room;
   const newMessage: ChatMessage = {
     id: crypto.randomUUID(),
     nickname: "시스템",

@@ -6,6 +6,7 @@ export function updateSubmitRoomAnswer(
   choiceIndex: number,
   timeLeft: number,
 ): Room {
+  if (room.status !== "playing") return room;
   const currentQuestion = room.quizQuestions[room.currentQuestionIndex];
 
   const isCorrect = choiceIndex === currentQuestion.answerIndex;

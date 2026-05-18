@@ -1,6 +1,7 @@
 import type { Room } from "@/app/types/quiz";
 
 export function updateRestartRoomGame(room: Room): Room {
+  if (room.status !== "finished") return room;
   return {
     ...room,
     status: "waiting",
