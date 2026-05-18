@@ -56,7 +56,7 @@ export default function HomeClient() {
   }, []);
 
   useEffect(() => {
-    const savedPlayerId = localStorage.getItem("currentPlayerId");
+    const savedPlayerId = sessionStorage.getItem("currentPlayerId");
 
     if (savedPlayerId) {
       setCurrentPlayerId(savedPlayerId);
@@ -64,7 +64,7 @@ export default function HomeClient() {
     }
 
     const newPlayerId = crypto.randomUUID();
-    localStorage.setItem("currentPlayerId", newPlayerId);
+    sessionStorage.setItem("currentPlayerId", newPlayerId);
     setCurrentPlayerId(newPlayerId);
   }, []);
 
