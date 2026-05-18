@@ -78,13 +78,44 @@ io.on("connection", (socket) => {
   socket.emit("roomsUpdated", rooms);
   socket.emit("quizSetsUpdated", sharedQuizSets);
 
-  socket.on("createQuizSet", ({ quizSet }: CreateQuizSetPayload) => {
-    sharedQuizSets = [...sharedQuizSets, quizSet];
+  socket.on("createQuizSet", async ({ quizSet }: CreateQuizSetPayload) => {
+    const { error } = await supabase.from("quiz_sets").insert({
+      id: quizSet.id,
+      title: quizSet.title,
+      category: quizSet.category,
+      author: quizSet.author,
+      author_id: quizSet.authorId,
+      questions: quizSet.questions,
+    });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    sharedQuizSets = [quizSet, ...sharedQuizSets];
 
     io.emit("quizSetsUpdated", sharedQuizSets);
   });
 
-  socket.on("updateQuizSet", ({ quizSet }: UpdateQuizSetPayload) => {
+  socket.on("updateQuizSet", async ({ quizSet }: UpdateQuizSetPayload) => {
+    const { error } = await supabase
+      .from("quiz_sets")
+      .update({
+        title: quizSet.title,
+        category: quizSet.category,
+        author: quizSet.author,
+        author_id: quizSet.authorId,
+        questions: quizSet.questions,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", quizSet.id);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
     sharedQuizSets = sharedQuizSets.map((item) =>
       item.id === quizSet.id ? quizSet : item,
     );
@@ -92,7 +123,17 @@ io.on("connection", (socket) => {
     io.emit("quizSetsUpdated", sharedQuizSets);
   });
 
-  socket.on("deleteQuizSet", ({ quizSetId }: DeleteQuizSetPayload) => {
+  socket.on("deleteQuizSet", async ({ quizSetId }: DeleteQuizSetPayload) => {
+    const { error } = await supabase
+      .from("quiz_sets")
+      .delete()
+      .eq("id", quizSetId);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
     sharedQuizSets = sharedQuizSets.filter(
       (quizSet) => quizSet.id !== quizSetId,
     );
