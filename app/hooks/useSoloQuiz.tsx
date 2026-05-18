@@ -2,21 +2,13 @@
 
 import { useEffect, useState } from "react";
 
-import type { Question, QuizSet, RankingRecord } from "../types/quiz";
+import type { Question, QuizSet } from "../types/quiz";
 
 type UseSoloQuizProps = {
   selectedQuizSet: QuizSet | undefined;
-  nickname: string;
-
-  setRankings: React.Dispatch<React.SetStateAction<RankingRecord[]>>;
 };
 
-export function useSoloQuiz({
-  selectedQuizSet,
-  nickname,
-
-  setRankings,
-}: UseSoloQuizProps) {
+export function useSoloQuiz({ selectedQuizSet }: UseSoloQuizProps) {
   const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -67,31 +59,11 @@ export function useSoloQuiz({
       const isLastQuestion = currentIndex >= quizQuestions.length - 1;
 
       if (isLastQuestion) {
-        const now = Date.now();
-
-        setFinishTime(now);
+        setFinishTime(Date.now());
         setIsQuizFinished(true);
-        if (!selectedQuizSet) return;
-
-        const elapsedSeconds = startTime
-          ? Math.floor((now - startTime) / 1000)
-          : 0;
-
-        const ranking: RankingRecord = {
-          id: crypto.randomUUID(),
-          nickname: nickname.trim() || "익명",
-          quizSetId: selectedQuizSet.id,
-          quizSetTitle: selectedQuizSet.title,
-          category: selectedQuizSet.category,
-          score: isCorrect ? score + 100 + timeLeft : score,
-          correctCount: isCorrect ? correctCount + 1 : correctCount,
-          totalQuestions: quizQuestions.length,
-          elapsedSeconds,
-          createdAt: new Date().toISOString(),
-        };
-        setRankings((prev) => [ranking, ...prev]);
         return;
       }
+
       setCurrentIndex((prev) => prev + 1);
       setSelectedChoice(null);
       setIsAnswerChecked(false);
@@ -117,27 +89,18 @@ export function useSoloQuiz({
 
   const goHome = () => {
     setQuizQuestions([]);
-
     setCurrentIndex(0);
-
     setScore(0);
-
     setAnswers([]);
-
     setSelectedChoice(null);
-
     setIsAnswerChecked(false);
-
     setIsQuizFinished(false);
-
     setCorrectCount(0);
-
     setStartTime(null);
-
     setFinishTime(null);
-
     setTimeLeft(30);
   };
+
   return {
     quizQuestions,
     currentQuestion,

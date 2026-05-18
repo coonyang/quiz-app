@@ -9,7 +9,7 @@ import RoomScreen from "./RoomScreen";
 import StartScreen from "./StartScreen";
 import { quizSets } from "../data/quizSets";
 import { useEffect, useState } from "react";
-import type { RankingRecord, QuizSet } from "../types/quiz";
+import type { QuizSet } from "../types/quiz";
 
 import { useRoomGame } from "../hooks/useRoomGame";
 import { useSoloQuiz } from "../hooks/useSoloQuiz";
@@ -24,9 +24,6 @@ export default function HomeClient() {
   const [customQuizSets, setCustomQuizSets] = useState<QuizSet[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingQuizSet, setEditingQuizSet] = useState<QuizSet | null>(null);
-
-  /* 랭킹 상태 */
-  const [rankings, setRankings] = useState<RankingRecord[]>([]);
 
   /* 온라인 방 상태 */
   const [playMode, setPlayMode] = useState<"solo" | "online">("solo");
@@ -81,14 +78,6 @@ export default function HomeClient() {
     }
 
     setIsNicknameModalOpen(true);
-  }, []);
-
-  useEffect(() => {
-    const savedRankings = localStorage.getItem("rankings");
-
-    if (savedRankings) {
-      setRankings(JSON.parse(savedRankings));
-    }
   }, []);
 
   const saveNickname = () => {
@@ -185,10 +174,6 @@ export default function HomeClient() {
     selectedQuizSet: allQuizSets.find(
       (quizSet) => quizSet.id === selectedQuizSetId,
     ),
-
-    nickname,
-
-    setRankings,
   });
 
   useEffect(() => {
@@ -390,8 +375,6 @@ export default function HomeClient() {
               startTime={startTime}
               finishTime={finishTime}
               correctCount={correctCount}
-              rankings={rankings}
-              selectedQuizSetId={selectedQuizSetId}
               onGoHome={goHome}
             />
           )}

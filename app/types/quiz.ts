@@ -1,20 +1,3 @@
-// 랭킹 타입
-
-export type RankingRecord = {
-  id: string;
-  nickname: string;
-  quizSetId: string;
-  quizSetTitle: string;
-  category: string;
-  score: number;
-  correctCount: number;
-  totalQuestions: number;
-  elapsedSeconds: number;
-  createdAt: string;
-};
-
-// 퀴즈 타입
-
 export type Question = {
   id: number;
   question: string;
@@ -30,8 +13,6 @@ export type QuizSet = {
   authorId: string;
   questions: Question[];
 };
-
-// 온라인 방 타입
 
 export type Player = {
   id: string;
