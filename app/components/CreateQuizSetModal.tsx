@@ -10,6 +10,7 @@ type CreateQuizSetModalProps = {
   categories: string[];
   onCreateQuizSet: (quizSet: QuizSet) => void;
   onUpdateQuizSet: (quizSet: QuizSet) => void;
+  currentPlayerId: string;
 };
 
 export default function CreateQuizSetModal({
@@ -19,6 +20,7 @@ export default function CreateQuizSetModal({
   onCreateQuizSet,
   onUpdateQuizSet,
   editingQuizSet,
+  currentPlayerId,
 }: CreateQuizSetModalProps) {
   const [title, setTitle] = useState(editingQuizSet?.title ?? "");
   const [category, setCategory] = useState(editingQuizSet?.category ?? "");
@@ -94,6 +96,7 @@ export default function CreateQuizSetModal({
       title: title.trim(),
       category: category.trim(),
       author: (editingQuizSet?.author ?? nickname.trim()) || "익명",
+      authorId: currentPlayerId,
       questions,
     };
 

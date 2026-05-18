@@ -298,12 +298,14 @@ export default function HomeClient() {
                     customQuizSets={customQuizSets}
                     onDeleteQuizSet={deleteCustomQuizSet}
                     onEditQuizSet={setEditingQuizSet}
+                    currentPlayerId={currentPlayerId}
                     onOpenCreateModal={() => setIsCreateModalOpen(true)}
                   />
 
                   {(isCreateModalOpen || editingQuizSet) && (
                     <CreateQuizSetModal
                       nickname={nickname}
+                      currentPlayerId={currentPlayerId}
                       editingQuizSet={editingQuizSet}
                       onClose={() => {
                         setIsCreateModalOpen(false);

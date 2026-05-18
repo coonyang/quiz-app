@@ -13,6 +13,7 @@ type StartScreenProps = {
   onDeleteQuizSet: (quizSetId: string) => void;
   onEditQuizSet: (quizSet: QuizSet) => void;
   onOpenCreateModal: () => void;
+  currentPlayerId: string;
 };
 export default function StartScreen({
   categories,
@@ -27,6 +28,7 @@ export default function StartScreen({
   onDeleteQuizSet,
   onEditQuizSet,
   onOpenCreateModal,
+  currentPlayerId,
 }: StartScreenProps) {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6">
@@ -72,7 +74,7 @@ export default function StartScreen({
             );
 
             const canDeleteQuizSet =
-              isCustomQuizSet && quizSet.author === nickname.trim();
+              isCustomQuizSet && quizSet.authorId === currentPlayerId;
             return (
               <div
                 key={quizSet.id}

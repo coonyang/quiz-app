@@ -4,6 +4,7 @@ export const quizSets = [
     title: "수학 기초",
     category: "수학",
     author: "관리자",
+    authorId: "system",
     questions: [
       {
         id: 1,
@@ -18,6 +19,7 @@ export const quizSets = [
     title: "개발용어 기초",
     category: "개발용어",
     author: "관리자",
+    authorId: "system",
     questions: [
       {
         id: 1,

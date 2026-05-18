@@ -27,6 +27,7 @@ export type QuizSet = {
   title: string;
   category: string;
   author: string;
+  authorId: string;
   questions: Question[];
 };
 

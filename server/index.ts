@@ -46,7 +46,6 @@ let sharedQuizSets: QuizSet[] = [];
 io.on("connection", (socket) => {
   console.log("유저 연결", socket.id);
   socket.emit("roomsUpdated", rooms);
-  socket.emit("roomsUpdated", rooms);
   socket.emit("quizSetsUpdated", sharedQuizSets);
 
   socket.on("createQuizSet", ({ quizSet }: CreateQuizSetPayload) => {
