@@ -29,6 +29,7 @@ let rooms: Room[] = [];
 
 io.on("connection", (socket) => {
   console.log("유저 연결", socket.id);
+  socket.emit("roomsUpdated", rooms);
 
   socket.on("createRoom", (room) => {
     rooms.unshift(room);
