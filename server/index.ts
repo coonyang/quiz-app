@@ -14,6 +14,15 @@ import {
   updateTimeOver,
 } from "../app/lib/room";
 import type { Room } from "../app/types/quiz";
+import type {
+  EnterRoomPayload,
+  SendRoomMessagePayload,
+  UpdateRoomQuizSetPayload,
+  SubmitRoomAnswerPayload,
+  PlayerRoomPayload,
+  RoomIdPayload,
+  CreateRoomPayload,
+} from "../app/types/socket";
 
 const app = express();
 
@@ -31,37 +40,43 @@ io.on("connection", (socket) => {
   console.log("유저 연결", socket.id);
   socket.emit("roomsUpdated", rooms);
 
-  socket.on("createRoom", (room) => {
+  socket.on("createRoom", (room: CreateRoomPayload) => {
     rooms.unshift(room);
 
     console.log("emit 직전", rooms);
     io.emit("roomsUpdated", rooms);
   });
 
-  socket.on("enterRoom", ({ roomId, currentPlayerId, nickname }) => {
-    rooms = rooms.map((room) =>
-      room.id === roomId
-        ? updateEnterRoom(room, currentPlayerId, nickname)
-        : room,
-    );
+  socket.on(
+    "enterRoom",
+    ({ roomId, currentPlayerId, nickname }: EnterRoomPayload) => {
+      rooms = rooms.map((room) =>
+        room.id === roomId
+          ? updateEnterRoom(room, currentPlayerId, nickname)
+          : room,
+      );
 
-    io.emit("roomsUpdated", rooms);
-  });
+      io.emit("roomsUpdated", rooms);
+    },
+  );
 
-  socket.on("sendRoomMessage", ({ roomId, message }) => {
-    rooms = rooms.map((room) =>
-      room.id === roomId
-        ? {
-            ...room,
-            messages: [...room.messages, message],
-          }
-        : room,
-    );
+  socket.on(
+    "sendRoomMessage",
+    ({ roomId, message }: SendRoomMessagePayload) => {
+      rooms = rooms.map((room) =>
+        room.id === roomId
+          ? {
+              ...room,
+              messages: [...room.messages, message],
+            }
+          : room,
+      );
 
-    io.emit("roomsUpdated", rooms);
-  });
+      io.emit("roomsUpdated", rooms);
+    },
+  );
 
-  socket.on("leaveRoom", ({ roomId, currentPlayerId }) => {
+  socket.on("leaveRoom", ({ roomId, currentPlayerId }: PlayerRoomPayload) => {
     rooms = rooms
       .map((room) =>
         room.id === roomId ? updateLeaveRoom(room, currentPlayerId) : room,
@@ -71,15 +86,18 @@ io.on("connection", (socket) => {
     io.emit("roomsUpdated", rooms);
   });
 
-  socket.on("updateRoomQuizSet", ({ roomId, quizSet }) => {
-    rooms = rooms.map((room) =>
-      room.id === roomId ? updateRoomQuizSet(room, quizSet) : room,
-    );
+  socket.on(
+    "updateRoomQuizSet",
+    ({ roomId, quizSet }: UpdateRoomQuizSetPayload) => {
+      rooms = rooms.map((room) =>
+        room.id === roomId ? updateRoomQuizSet(room, quizSet) : room,
+      );
 
-    io.emit("roomsUpdated", rooms);
-  });
+      io.emit("roomsUpdated", rooms);
+    },
+  );
 
-  socket.on("startRoomGame", ({ roomId }) => {
+  socket.on("startRoomGame", ({ roomId }: RoomIdPayload) => {
     rooms = rooms.map((room) =>
       room.id === roomId ? updateStartRoomGame(room) : room,
     );
@@ -89,7 +107,7 @@ io.on("connection", (socket) => {
 
   socket.on(
     "submitRoomAnswer",
-    ({ roomId, playerId, choiceIndex, timeLeft }) => {
+    ({ roomId, playerId, choiceIndex, timeLeft }: SubmitRoomAnswerPayload) => {
       rooms = rooms.map((room) =>
         room.id === roomId
           ? updateSubmitRoomAnswer(room, playerId, choiceIndex, timeLeft)
@@ -100,7 +118,7 @@ io.on("connection", (socket) => {
     },
   );
 
-  socket.on("timeOver", ({ roomId }) => {
+  socket.on("timeOver", ({ roomId }: RoomIdPayload) => {
     rooms = rooms.map((room) =>
       room.id === roomId ? updateTimeOver(room) : room,
     );
@@ -108,7 +126,7 @@ io.on("connection", (socket) => {
     io.emit("roomsUpdated", rooms);
   });
 
-  socket.on("countdownEnd", ({ roomId }) => {
+  socket.on("countdownEnd", ({ roomId }: RoomIdPayload) => {
     rooms = rooms.map((room) =>
       room.id === roomId ? updateCountdownEnd(room) : room,
     );
@@ -116,7 +134,7 @@ io.on("connection", (socket) => {
     io.emit("roomsUpdated", rooms);
   });
 
-  socket.on("nextQuestion", ({ roomId }) => {
+  socket.on("nextQuestion", ({ roomId }: RoomIdPayload) => {
     rooms = rooms.map((room) =>
       room.id === roomId ? updateNextQuestion(room) : room,
     );
@@ -124,7 +142,7 @@ io.on("connection", (socket) => {
     io.emit("roomsUpdated", rooms);
   });
 
-  socket.on("restartRoomGame", ({ roomId }) => {
+  socket.on("restartRoomGame", ({ roomId }: RoomIdPayload) => {
     rooms = rooms.map((room) =>
       room.id === roomId ? updateRestartRoomGame(room) : room,
     );
