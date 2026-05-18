@@ -56,7 +56,7 @@ export default function HomeClient() {
   /* localStorage에 저장된 데이터 불러오기 */
 
   useEffect(() => {
-    const savedPlayerId = sessionStorage.getItem("currentPlayerId");
+    const savedPlayerId = localStorage.getItem("currentPlayerId");
 
     if (savedPlayerId) {
       setCurrentPlayerId(savedPlayerId);
@@ -64,7 +64,7 @@ export default function HomeClient() {
     }
 
     const newPlayerId = crypto.randomUUID();
-    sessionStorage.setItem("currentPlayerId", newPlayerId);
+    localStorage.setItem("currentPlayerId", newPlayerId);
     setCurrentPlayerId(newPlayerId);
   }, []);
 
@@ -79,6 +79,16 @@ export default function HomeClient() {
 
     setIsNicknameModalOpen(true);
   }, []);
+
+  useEffect(() => {
+    const exists = visibleQuizSets.some(
+      (quizSet) => quizSet.id === selectedQuizSetId,
+    );
+
+    if (!exists) {
+      setSelectedQuizSetId("");
+    }
+  }, [visibleQuizSets, selectedQuizSetId]);
 
   const saveNickname = () => {
     const nextNickname = nicknameInput.trim();
