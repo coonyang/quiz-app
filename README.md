@@ -133,7 +133,6 @@ UI와 로직 양쪽에서 중복 제출을 방지했습니다.
 
 ### 사용 도구
 
-- Tech Stack
 - React
 - TypeScript
 - javascript
