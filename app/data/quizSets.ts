@@ -130,8 +130,144 @@ export const quizSets = [
         id: 3,
         question:
           "Hypertext Transfer Protocol의 준말로, 웹에서 데이터를 주고받기 위한 프로토콜을 뭐라고 할까요?",
-        choices: ["http", "htp", "hp", "https"],
+        choices: ["http", "htp", "hp", "htps"],
         answerIndex: 0,
+      },
+      {
+        id: 4,
+        question:
+          "브라우저를 구성하는 페이지를 이루는 element를 tree형태로 표현한 것을 뭐라고 할까요?",
+        choices: ["돔(DOM)", "함수(Function)", "마인드맵", "프로그램"],
+        answerIndex: 0,
+      },
+      {
+        id: 5,
+        question: "다음중 비동기 함수가 아닌 것을 고르시오",
+        choices: ["setTimeout", "setInterval", "fetch", "await"],
+        answerIndex: 3,
+      },
+      {
+        id: 6,
+        question:
+          "리액트 훅 중 저장공간의 역할을 가지며 state가 변화할때 렌더링이 일어나지 않는 것은?",
+        choices: ["useRef", "useEffect", "useState", "useReducer"],
+        answerIndex: 0,
+      },
+      {
+        id: 7,
+        question:
+          "리액트 훅 중 저장공간의 역할을 가지며 state가 변화할때 렌더링이 일어나는 것은?",
+        choices: ["useRef", "useEffect", "useState", "useMemo"],
+        answerIndex: 2,
+      },
+      {
+        id: 8,
+        question: "리액트 훅 중 컴포넌트가 처음 렌더링 된 후 실행되는것은?",
+        choices: ["useRef", "useEffect", "useState", "useReducer"],
+        answerIndex: 1,
+      },
+      {
+        id: 9,
+        question: "변수를 재선언, 재할당 할 수 없는 것은?",
+        choices: ["var", "let", "const", "static"],
+        answerIndex: 2,
+      },
+      {
+        id: 10,
+        question:
+          "서버에 데이터를 생성하거나 제출할 때 주로 사용되는 HTTP 메서드는?",
+        choices: ["GET", "POST", "DELETE", "PUT"],
+        answerIndex: 1,
+      },
+      {
+        id: 11,
+        question:
+          "사용자의 브라우저에 저장되며 서버와 함께 전송될 수 있는 데이터는?",
+        choices: ["세션", "쿠키", "로컬 스토리지", "세션 스토리지"],
+        answerIndex: 1,
+      },
+      {
+        id: 12,
+        question:
+          "기존 함수 표현 방식의 this 바인딩 문제를 해결하기 위해 등장한 함수는?",
+        choices: ["Arrow Function", "Export Function", "const", "for"],
+        answerIndex: 0,
+      },
+      {
+        id: 13,
+        question:
+          "작업이 완료되지 않은 상태에서도 다음 작업을 실행하는 처리방식은?",
+        choices: ["비동기 처리", "동기 처리", "반복 처리", "병렬 처리"],
+        answerIndex: 0,
+      },
+      {
+        id: 14,
+        question: "다음중 엄격한 비교 방식을 고르시오",
+        choices: ["=", "==", "===", "===="],
+        answerIndex: 2,
+      },
+      {
+        id: 15,
+        question:
+          "다른 함수의 인자로 이용되며 어떠한 이벤트에 의해 호출되는 함수를 뭐라고 할까요?",
+        choices: ["전환 함수", "공유 함수", "콜백 함수", "동기 함수"],
+        answerIndex: 2,
+      },
+      {
+        id: 16,
+        question:
+          "한 컴포넌트에서 다른 컴포넌트로 정보를 전달하기 위해 사용되는 것은?",
+        choices: ["props", "export", "useState", "type"],
+        answerIndex: 0,
+      },
+      {
+        id: 17,
+        question: "배열의 각 요소를 순회하며 새로운 배열을 반환하는 함수는?",
+        choices: ["filter", "map", "find", "forEach"],
+        answerIndex: 1,
+      },
+      {
+        id: 18,
+        question: "배열에서 조건에 맞는 첫 번째 요소를 반환하는 함수는?",
+        choices: ["map", "filter", "find", "reduce"],
+        answerIndex: 2,
+      },
+      {
+        id: 19,
+        question: "JavaScript에서 배열의 마지막 요소를 추가하는 메서드는?",
+        choices: ["shift", "unshift", "push", "pop"],
+        answerIndex: 2,
+      },
+      {
+        id: 20,
+        question:
+          "CSS에서 요소를 가로 방향으로 배치할 때 가장 많이 사용하는 레이아웃 방식은?",
+        choices: ["flex", "block", "inline", "relative"],
+        answerIndex: 0,
+      },
+      {
+        id: 21,
+        question:
+          "React에서 배열 상태를 수정할 때 기존 배열을 직접 변경하지 않고 새로운 배열을 만드는 이유는?",
+        choices: [
+          "메모리를 절약하기 위해",
+          "리렌더링을 정상적으로 발생시키기 위해",
+          "배열의 길이를 줄이기 위해",
+          "속도를 높이기 위해",
+        ],
+        answerIndex: 1,
+      },
+      {
+        id: 22,
+        question:
+          "setItems([...items, newItem]) 에서 ...items 를 사용하는 이유는?",
+        choices: [
+          "배열을 문자열로 변환하기 위해",
+          "배열의 모든 요소를 새로운 배열에 복사하기 위해",
+          "배열을 삭제하기 위해",
+          "배열을 정렬하기 위해",
+        ],
+        answerIndex: 1,
       },
     ],
   },
