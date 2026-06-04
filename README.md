@@ -1,6 +1,7 @@
 # Quiz Multiplayer Web App
 
 배포주소:https://quiz-app-inky-ten-98.vercel.app/
+* 온라인 방 만들때 로딩이 오래 걸린다면 새로고침 후 재생성 해주세요!
 
 ## Problem
 
