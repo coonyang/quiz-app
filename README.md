@@ -1,7 +1,8 @@
 # Quiz Multiplayer Web App
 
 배포주소:https://quiz-app-inky-ten-98.vercel.app/
-* 소켓 무료 플랜이어서 온라인 방 만들때 로딩이 오래 걸린다면 새로고침 후 재생성 해주세요!
+* 소켓 무료 플랜이어서 온라인 방 만들때 로딩이 오래 걸릴수 있습니다.
+* F12 후 Network 에서 soket서버가 활성화 될때까지 기다려주세요.
 
 ## Problem
 
