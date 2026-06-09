@@ -8,6 +8,7 @@ type QuizScreenProps = {
   selectedChoice: number | null;
   onSelectChoice: (choiceIndex: number) => void;
   timeLeft: number;
+  goHome: () => void;
 };
 
 export default function QuizScreen({
@@ -18,12 +19,22 @@ export default function QuizScreen({
   selectedChoice,
   onSelectChoice,
   timeLeft,
+  goHome,
 }: QuizScreenProps) {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6">
-      <p className="text-sm">
-        {currentIndex + 1} / {quizQuestions.length}
-      </p>
+      <div className="flex items-center justify-between">
+        <p>
+          {currentIndex + 1} / {quizQuestions.length}
+        </p>
+
+        <button
+          onClick={goHome}
+          className="rounded border px-3 py-1 text-sm hover:bg-gray-100"
+        >
+          나가기
+        </button>
+      </div>
       <p className="text-sm">남은 시간: {timeLeft}초</p>
       <h2 className="text-2xl font-bold leading-relaxed">
         {currentQuestion.question}

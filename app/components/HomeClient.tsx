@@ -373,6 +373,7 @@ export default function HomeClient() {
               selectedChoice={selectedChoice}
               onSelectChoice={selectChoice}
               timeLeft={timeLeft}
+              goHome={goHome}
             />
           )}
 
