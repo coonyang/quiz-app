@@ -6,9 +6,13 @@ import type { Question, QuizSet } from "../types/quiz";
 
 type UseSoloQuizProps = {
   selectedQuizSet: QuizSet | undefined;
+  questionCount: number;
 };
 
-export function useSoloQuiz({ selectedQuizSet }: UseSoloQuizProps) {
+export function useSoloQuiz({
+  selectedQuizSet,
+  questionCount,
+}: UseSoloQuizProps) {
   const [quizQuestions, setQuizQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -26,7 +30,7 @@ export function useSoloQuiz({ selectedQuizSet }: UseSoloQuizProps) {
     if (!selectedQuizSet) return;
     const shuffledQuestions = [...selectedQuizSet.questions]
       .sort(() => Math.random() - 0.5)
-      .slice(0, 10);
+      .slice(0, questionCount);
 
     setQuizQuestions(shuffledQuestions);
 

@@ -24,6 +24,7 @@ export default function HomeClient() {
   const [customQuizSets, setCustomQuizSets] = useState<QuizSet[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingQuizSet, setEditingQuizSet] = useState<QuizSet | null>(null);
+  const [questionCount, setQuestionCount] = useState(10);
 
   /* 온라인 방 상태 */
   const [playMode, setPlayMode] = useState<"solo" | "online">("solo");
@@ -184,6 +185,7 @@ export default function HomeClient() {
     selectedQuizSet: allQuizSets.find(
       (quizSet) => quizSet.id === selectedQuizSetId,
     ),
+    questionCount,
   });
 
   useEffect(() => {
@@ -297,6 +299,8 @@ export default function HomeClient() {
                     onEditQuizSet={setEditingQuizSet}
                     currentPlayerId={currentPlayerId}
                     onOpenCreateModal={() => setIsCreateModalOpen(true)}
+                    questionCount={questionCount}
+                    setQuestionCount={setQuestionCount}
                   />
 
                   {(isCreateModalOpen || editingQuizSet) && (

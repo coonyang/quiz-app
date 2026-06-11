@@ -14,6 +14,8 @@ type StartScreenProps = {
   onEditQuizSet: (quizSet: QuizSet) => void;
   onOpenCreateModal: () => void;
   currentPlayerId: string;
+  questionCount: number;
+  setQuestionCount: React.Dispatch<React.SetStateAction<number>>;
 };
 export default function StartScreen({
   categories,
@@ -29,6 +31,8 @@ export default function StartScreen({
   onEditQuizSet,
   onOpenCreateModal,
   currentPlayerId,
+  questionCount,
+  setQuestionCount,
 }: StartScreenProps) {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-6">
@@ -66,6 +70,15 @@ export default function StartScreen({
             </div>
 
             <p className="mt-2 text-sm">선택한 카테고리: {selectedCategory}</p>
+            <select
+              value={questionCount}
+              onChange={(e) => setQuestionCount(Number(e.target.value))}
+              className="rounded-md border px-2 py-1 mt-2"
+            >
+              <option value={10}>10문제</option>
+              <option value={15}>15문제</option>
+              <option value={20}>20문제</option>
+            </select>
           </div>
 
           {quizSets.map((quizSet) => {
