@@ -114,6 +114,10 @@ export default function HomeClient() {
     roomQuizSet,
     sendRoomMessage,
 
+    generateAiRoomQuizSet,
+    isGeneratingAiQuestions,
+    aiQuizError,
+
     startRoomGame,
     submitRoomAnswer,
 
@@ -363,6 +367,9 @@ export default function HomeClient() {
                   quizSets={allQuizSets}
                   onUpdateRoomQuizSet={roomQuizSet}
                   onNextQuestion={nextQuestion}
+                  onGenerateAiQuizSet={generateAiRoomQuizSet}
+                  isGeneratingAiQuestions={isGeneratingAiQuestions}
+                  aiQuizError={aiQuizError}
                 />
               )}
             </>
