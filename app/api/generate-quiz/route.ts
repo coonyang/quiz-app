@@ -29,9 +29,9 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.GROQ_API_KEY) {
     return NextResponse.json(
-      { error: "서버에 OPENAI_API_KEY가 설정되어 있지 않습니다." },
+      { error: "서버에 GROQ_API_KEY가 설정되어 있지 않습니다." },
       { status: 500 },
     );
   }
@@ -41,16 +41,19 @@ export async function POST(request: Request) {
     MAX_COUNT,
   );
 
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const client = new OpenAI({
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: "https://api.groq.com/openai/v1",
+  });
 
   try {
     const completion = await client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "openai/gpt-oss-20b",
       messages: [
         {
           role: "system",
           content:
-            "너는 퀴즈 문제 출제자야. 주어진 주제에 맞는 4지선다 객관식 퀴즈 문제를 만들어. 선택지는 정확히 4개, answerIndex는 0~3 사이의 정답 선택지 위치야. 반드시 JSON으로만 답해.",
+            "너는 퀴즈 문제 출제자야. 주어진 주제에 맞는 4지선다 객관식 퀴즈 문제를 만들어. 문제는 반드시 한국어로만 작성해. 선택지는 정확히 4개, answerIndex는 0~3 사이의 정답 선택지 위치야.",
         },
         {
           role: "user",
