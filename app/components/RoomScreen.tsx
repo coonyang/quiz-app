@@ -15,6 +15,15 @@ type RoomScreenProps = {
   onRestartRoomGame: (roomId: string) => void;
   quizSets: QuizSet[];
   onUpdateRoomQuizSet: (roomId: string, quizSetId: string) => void;
+  onGenerateAiQuizSet: (
+    roomId: string,
+    topic: string,
+    category: string,
+    count: number,
+  ) => void;
+  isGeneratingAiQuestions: boolean;
+  aiQuizError: string;
+
   onNextQuestion: (roomId: string) => void;
   submitRoomAnswer: (
     roomId: string,
@@ -38,6 +47,9 @@ export default function RoomScreen({
   onRestartRoomGame,
   onNextQuestion,
   onUpdateRoomQuizSet,
+  onGenerateAiQuizSet,
+  isGeneratingAiQuestions,
+  aiQuizError,
 }: RoomScreenProps) {
   const [messageText, setMessageText] = useState("");
   const [now, setNow] = useState(0);
@@ -45,6 +57,8 @@ export default function RoomScreen({
   const [resultCountdown, setResultCountdown] = useState<number | null>(null);
   const [selectedQuizSetCategory, setSelectedQuizSetCategory] =
     useState("전체");
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiCount, setAiCount] = useState(5);
 
   const quizSetCategories = [
     "전체",
@@ -201,6 +215,35 @@ export default function RoomScreen({
                         </option>
                       ))}
                     </select>
+                    <input
+                      value={aiTopic}
+                      onChange={(e) => setAiTopic(e.target.value)}
+                      placeholder="AI 주제 (예: 세계사)"
+                      className="w-32 rounded-md border px-2 py-1"
+                    />
+                    <input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={aiCount}
+                      onChange={(e) => setAiCount(Number(e.target.value))}
+                      className="w-14 rounded-md border px-2 py-1"
+                    />
+                    <button
+                      type="button"
+                      disabled={isGeneratingAiQuestions || !aiTopic.trim()}
+                      onClick={() =>
+                        onGenerateAiQuizSet(
+                          room.id,
+                          aiTopic,
+                          selectedQuizSetCategory,
+                          aiCount,
+                        )
+                      }
+                      className="whitespace-nowrap rounded-md border px-2 py-1 hover:bg-blue-100 disabled:opacity-40"
+                    >
+                      {isGeneratingAiQuestions ? "생성 중..." : "AI로 교체"}
+                    </button>
                   </div>
                 ) : (
                   `문제집: ${room.quizSetTitle}`
