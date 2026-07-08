@@ -206,11 +206,11 @@ export default function HomeClient() {
     return null;
   }
   return (
-    <main className="min-h-screen px-4 py-4">
+    <main className="min-h-screen px-4 py-8">
       <div className="mx-auto max-w-6xl">
         {isNicknameModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-            <section className="w-full max-w-sm rounded-lg bg-white p-6 text-black">
+          <div className="modal-overlay">
+            <section className="modal-panel max-w-sm">
               <h2 className="text-xl font-bold">
                 {nickname ? "닉네임 변경" : "닉네임 입력"}
               </h2>
@@ -224,25 +224,30 @@ export default function HomeClient() {
                   }
                 }}
                 placeholder="닉네임"
-                className="mt-4 w-full rounded-md border px-4 py-2"
+                className="input mt-4 w-full"
                 autoFocus
               />
 
               <button
                 onClick={saveNickname}
                 disabled={!nicknameInput.trim()}
-                className="mt-4 w-full rounded-md bg-black px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-primary mt-4 w-full"
               >
                 시작하기
               </button>
             </section>
           </div>
         )}
-        {nickname && !enteredRoomId && (
-          <div className="mb-4 flex justify-end">
-            <div className="flex items-center gap-2 rounded-md border bg-white px-3 py-2 text-sm">
-              <span className="text-gray-500">닉네임</span>
-              <span className="font-semibold">{nickname}</span>
+
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">
+            퀴즈 앱
+          </h1>
+
+          {nickname && !enteredRoomId && (
+            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-sm">
+              <span className="text-slate-400">닉네임</span>
+              <span className="font-semibold text-slate-900">{nickname}</span>
 
               <button
                 type="button"
@@ -250,25 +255,25 @@ export default function HomeClient() {
                   setNicknameInput(nickname);
                   setIsNicknameModalOpen(true);
                 }}
-                className="ml-2 rounded-md border px-2 py-1 text-xs hover:bg-gray-100"
+                className="ml-1 rounded-full px-2 py-0.5 text-xs text-slate-500 hover:bg-slate-100"
               >
                 변경
               </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         <section className="min-w-0">
           {!currentQuestion && !isQuizFinished && (
             <>
               {!enteredRoomId && (
-                <div className="mx-auto mb-4 flex max-w-xl gap-2">
+                <div className="mx-auto mb-6 flex max-w-xl gap-2 rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
                   <button
                     onClick={() => setPlayMode("solo")}
-                    className={`flex-1 rounded-md border px-4 py-2 ${
+                    className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                       playMode === "solo"
-                        ? "bg-black text-white"
-                        : "bg-white text-black"
+                        ? "bg-emerald-600 text-white"
+                        : "text-slate-500 hover:bg-slate-50"
                     }`}
                   >
                     혼자 풀기
@@ -276,10 +281,10 @@ export default function HomeClient() {
 
                   <button
                     onClick={() => setPlayMode("online")}
-                    className={`flex-1 rounded-md border px-4 py-2 ${
+                    className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                       playMode === "online"
-                        ? "bg-black text-white"
-                        : "bg-white text-black"
+                        ? "bg-emerald-600 text-white"
+                        : "text-slate-500 hover:bg-slate-50"
                     }`}
                   >
                     온라인 방
@@ -349,7 +354,7 @@ export default function HomeClient() {
                 </>
               )}
               {playMode === "online" && enteredRoomId && !enteredRoom && (
-                <p>방 입장 중...</p>
+                <p className="text-center text-slate-500">방 입장 중...</p>
               )}
               {playMode === "online" && enteredRoom && (
                 <RoomScreen

@@ -180,31 +180,31 @@ export default function RoomScreen({
   const sortedPlayers = [...room.players].sort((a, b) => b.score - a.score);
 
   return (
-    <section className="mx-auto grid min-h-[80vh] max-w-6xl  gap-4 grid-cols-[70%_30%]">
+    <section className="mx-auto grid min-h-[80vh] max-w-6xl gap-4 grid-cols-[70%_30%]">
       <div className="flex flex-col gap-4 h-full">
-        <div className="rounded-lg border p-5">
+        <div className="card">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm text-gray-500">room id:{room.id}</p>
-              <h1 className="text-2xl font-bold">{room.title}</h1>
-              <div className="mt-1 text-sm text-gray-500">
+              <p className="text-xs text-slate-400">room id: {room.id}</p>
+              <h1 className="text-2xl font-bold text-slate-900">
+                {room.title}
+              </h1>
+              <div className="mt-1 text-sm text-slate-500">
                 {isHost && room.status === "waiting" ? (
-                  <div className="mt-1 flex flex-col gap-1">
+                  <div className="mt-1 flex flex-col gap-2">
                     <span className="text-xs">
                       현재 문제집: {room.quizSetTitle}
                       {isAiQuizSet && (
-                        <span className="ml-1 rounded bg-blue-100 px-1.5 py-0.5 text-xs font-semibold text-blue-700">
-                          AI
-                        </span>
+                        <span className="badge-ai ml-1">AI</span>
                       )}
                     </span>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <select
                         value={selectedQuizSetCategory}
                         onChange={(e) => {
                           setSelectedQuizSetCategory(e.target.value);
                         }}
-                        className="rounded-md border px-2 py-1 "
+                        className="input py-1.5"
                       >
                         {quizSetCategories.map((category) => (
                           <option key={category} value={category}>
@@ -218,7 +218,7 @@ export default function RoomScreen({
                         onChange={(e) => {
                           onUpdateRoomQuizSet(room.id, e.target.value);
                         }}
-                        className=" rounded-md border px-2 py-1 "
+                        className="input py-1.5"
                       >
                         {visibleQuizSets.map((quizSet) => (
                           <option key={quizSet.id} value={quizSet.id}>
@@ -226,11 +226,12 @@ export default function RoomScreen({
                           </option>
                         ))}
                       </select>
+                      <span className="h-5 w-px bg-slate-200" />
                       <input
                         value={aiTopic}
                         onChange={(e) => setAiTopic(e.target.value)}
                         placeholder="AI 주제 (예: 세계사)"
-                        className="w-32 rounded-md border px-2 py-1"
+                        className="input w-32 py-1.5"
                       />
                       <input
                         type="number"
@@ -238,7 +239,7 @@ export default function RoomScreen({
                         max={10}
                         value={aiCount}
                         onChange={(e) => setAiCount(Number(e.target.value))}
-                        className="w-14 rounded-md border px-2 py-1"
+                        className="input w-14 py-1.5"
                       />
                       <button
                         type="button"
@@ -251,9 +252,11 @@ export default function RoomScreen({
                             aiCount,
                           )
                         }
-                        className="whitespace-nowrap rounded-md border px-2 py-1 hover:bg-blue-100 disabled:opacity-40"
+                        className="btn-outline btn-sm whitespace-nowrap border-indigo-300 text-indigo-700 hover:bg-indigo-50"
                       >
-                        {isGeneratingAiQuestions ? "생성 중..." : "AI로 교체"}
+                        {isGeneratingAiQuestions
+                          ? "생성 중..."
+                          : "AI로 교체"}
                       </button>
                       {aiQuizError && (
                         <p className="w-full text-xs text-red-500">
@@ -265,30 +268,23 @@ export default function RoomScreen({
                 ) : (
                   <>
                     문제집: {room.quizSetTitle}
-                    {isAiQuizSet && (
-                      <span className="ml-1 rounded bg-blue-100 px-1.5 py-0.5 text-xs font-semibold text-blue-700">
-                        AI
-                      </span>
-                    )}
+                    {isAiQuizSet && <span className="badge-ai ml-1">AI</span>}
                   </>
                 )}
               </div>
             </div>
 
-            <button
-              onClick={onLeaveRoom}
-              className="rounded-md border px-4 py-2 hover:bg-gray-100"
-            >
+            <button onClick={onLeaveRoom} className="btn-outline btn-sm">
               나가기
             </button>
           </div>
         </div>
-        <div className="flex flex-1 flex-col rounded-lg border p-5 min-h-[410px]">
-          <h2 className="mb-3 text-lg font-semibold">게임</h2>
+        <div className="card flex flex-1 flex-col min-h-[410px]">
+          <h2 className="mb-3 text-lg font-semibold text-slate-900">게임</h2>
 
           {room.status === "waiting" && (
             <div className="flex flex-1 flex-col items-center justify-center">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-slate-400">
                 아직 게임이 시작되지 않았습니다.
               </p>
             </div>
@@ -298,35 +294,35 @@ export default function RoomScreen({
               onClick={() => {
                 onStartGame(room.id);
               }}
-              className="mt-4 w-full rounded-md border px-5 py-3 hover:bg-emerald-300"
+              className="btn-primary mt-4 w-full py-3"
             >
               게임 시작
             </button>
           )}
           {room.status === "countdown" && (
-            <div className="flex flex-1 flex-col items-center justify-center">
+            <div className="flex flex-1 flex-col items-center justify-center text-2xl font-bold text-slate-700">
               {countdown ?? "잠시 후 게임이 시작됩니다..."}
             </div>
           )}
           {room.status === "playing" && (
             <>
-              <p className="text-sm text-gray-500">게임이 진행중입니다.</p>
+              <p className="text-sm text-slate-500">게임이 진행중입니다.</p>
               <p className="mt-4 mb-4">남은 시간: {timeLeft}초</p>
-              <div className="mb-6 h-3 overflow-hidden rounded-full bg-gray-200">
+              <div className="mb-6 h-3 overflow-hidden rounded-full bg-slate-200">
                 <div
-                  className={`h-full  ${
-                    timeLeft <= 5 ? "bg-red-400" : "bg-emerald-400"
+                  className={`h-full transition-all ${
+                    timeLeft <= 5 ? "bg-red-400" : "bg-emerald-500"
                   }`}
                   style={{
                     width: `${(timeLeft / room.timeLimit) * 100}%`,
                   }}
                 />
               </div>
-              <div className=" flex flex-col ">
-                <p>
+              <div className="flex flex-col">
+                <p className="text-sm text-slate-400">
                   {room.currentQuestionIndex + 1} / {room.quizQuestions.length}
                 </p>
-                <h2 className="break-all text-2xl font-bold text-center">
+                <h2 className="break-all text-2xl font-bold text-center text-slate-900">
                   {currentQuestion.question}
                 </h2>
               </div>
@@ -345,8 +341,8 @@ export default function RoomScreen({
                     disabled={hasAnswered}
                     className={`min-h-[50px] overflow-y-auto rounded-xl border px-5 py-4 text-left text-lg font-medium transition-all ${
                       hasAnswered
-                        ? "cursor-not-allowed bg-gray-100 opacity-70"
-                        : "hover:scale-[1.01] hover:bg-emerald-100"
+                        ? "cursor-not-allowed border-slate-200 bg-slate-100 opacity-70"
+                        : "border-slate-200 bg-white hover:scale-[1.01] hover:border-emerald-300 hover:bg-emerald-50"
                     }`}
                   >
                     <span className="mr-3 font-bold text-emerald-600">
@@ -360,15 +356,19 @@ export default function RoomScreen({
             </>
           )}
           {room.status === "result" && (
-            <p>{resultCountdown ?? 2}초 후 다음 문제로 넘어갑니다...</p>
+            <p className="text-slate-500">
+              {resultCountdown ?? 2}초 후 다음 문제로 넘어갑니다...
+            </p>
           )}
           {room.status === "finished" && (
             <div>
               <div className="flex justify-between">
-                <h3 className="text-xl font-bold">최종 순위</h3>
+                <h3 className="text-xl font-bold text-slate-900">
+                  최종 순위
+                </h3>
                 {isHost && (
                   <button
-                    className=" rounded border p-2 mr-2 hover:bg-gray-100"
+                    className="btn-outline btn-sm"
                     onClick={() => onRestartRoomGame(room.id)}
                   >
                     다시하기
@@ -379,19 +379,21 @@ export default function RoomScreen({
                 {sortedPlayers.map((player, index) => (
                   <div
                     key={player.id}
-                    className="flex items-center justify-between rounded-md border px-4 py-3"
+                    className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3"
                   >
                     <div>
-                      <p className="font-semibold">
+                      <p className="font-semibold text-slate-900">
                         {index + 1}. {player.nickname}
                         {player.id === currentPlayerId ? " (나)" : ""}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-slate-400">
                         {player.isHost ? "방장" : "참가자"}
                       </p>
                     </div>
 
-                    <p className="font-semibold">{player.score}점</p>
+                    <p className="font-semibold text-slate-900">
+                      {player.score}점
+                    </p>
                   </div>
                 ))}
               </div>
@@ -399,8 +401,8 @@ export default function RoomScreen({
           )}
         </div>
       </div>
-      <div className="flex flex-1 flex-col rounded-lg border p-5">
-        <h2 className="mb-3 text-lg font-semibold">참가자</h2>
+      <div className="card flex flex-1 flex-col">
+        <h2 className="mb-3 text-lg font-semibold text-slate-900">참가자</h2>
 
         <div className="grid gap-2">
           {Array.from({ length: room.maxPlayers }).map((_, index) => {
@@ -409,10 +411,10 @@ export default function RoomScreen({
               return (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between rounded-md border px-4 py-3"
+                  className="flex items-center justify-between rounded-lg border border-slate-200 px-4 py-3"
                 >
                   <div className="min-w-[100px]">
-                    <p className="font-semibold">
+                    <p className="font-semibold text-slate-900">
                       {player.nickname}
                       {player.id === currentPlayerId ? " (나)" : ""}
                       {player.answeredQuestionIndex ===
@@ -421,12 +423,14 @@ export default function RoomScreen({
                           room.status === "result") &&
                         (player.isLastAnswerCorrect ? "✅" : "❌")}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-slate-400">
                       {player.isHost ? "방장" : "참가자"}
                     </p>
                   </div>
 
-                  <p className="font-semibold">{player.score}점</p>
+                  <p className="font-semibold text-slate-900">
+                    {player.score}점
+                  </p>
                 </div>
               );
             }
@@ -434,9 +438,9 @@ export default function RoomScreen({
               return (
                 <div
                   key={index}
-                  className="flex items-center justify-between rounded-md border px-4 py-3"
+                  className="flex items-center justify-between rounded-lg border border-dashed border-slate-200 px-4 py-3"
                 >
-                  <div className="flex items-center justify-center rounded-md  py-2 text-gray-400">
+                  <div className="flex items-center justify-center py-2 text-slate-300">
                     <p className="font-semibold">빈자리</p>
                   </div>
                 </div>
@@ -446,17 +450,19 @@ export default function RoomScreen({
         </div>
       </div>
 
-      <aside className="flex min-h-[400px] flex-col rounded-lg border p-4 lg:h-full">
-        <h2 className="mb-3 text-lg font-semibold">채팅</h2>
+      <aside className="card flex min-h-[400px] flex-col lg:h-full">
+        <h2 className="mb-3 text-lg font-semibold text-slate-900">채팅</h2>
 
         <div
           ref={chatContainerRef}
-          className="flex-1 space-y-3 overflow-y-auto rounded-md border p-3 max-h-[300px]"
+          className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-slate-100 bg-slate-50 p-3 max-h-[300px]"
         >
           {room.messages.map((message) => (
             <div key={message.id}>
-              <p className="text-sm font-semibold">{message.nickname}</p>
-              <p className="text-sm">{message.message}</p>
+              <p className="text-sm font-semibold text-slate-700">
+                {message.nickname}
+              </p>
+              <p className="text-sm text-slate-600">{message.message}</p>
             </div>
           ))}
         </div>
@@ -471,13 +477,10 @@ export default function RoomScreen({
               }
             }}
             placeholder="메시지 입력"
-            className="min-w-0 flex-1 rounded-md border px-3 py-2"
+            className="input min-w-0 flex-1"
           />
 
-          <button
-            onClick={sendMessage}
-            className="rounded-md border px-3 py-2 hover:bg-gray-100"
-          >
+          <button onClick={sendMessage} className="btn-outline">
             전송
           </button>
         </div>

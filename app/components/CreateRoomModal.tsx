@@ -60,13 +60,13 @@ export default function CreateRoomModal({
     onCreateRoom(newRoom);
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <section className="w-full max-w-xl rounded-lg bg-white p-6 text-black">
+    <div className="modal-overlay">
+      <section className="modal-panel">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">방 만들기</h2>
+          <h2 className="text-2xl font-bold text-slate-900">방 만들기</h2>
 
           <button
-            className="rounded-md border px-3 py-1 hover:bg-zinc-200"
+            className="rounded-md px-3 py-1 text-sm text-slate-500 hover:bg-slate-100"
             onClick={onClose}
           >
             닫기
@@ -84,7 +84,7 @@ export default function CreateRoomModal({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="방 제목"
-            className="rounded-md border px-4 py-2"
+            className="input"
           />
           <select
             value={selectedCategory}
@@ -92,7 +92,7 @@ export default function CreateRoomModal({
               setSelectedCategory(e.target.value);
               setQuizSetId("");
             }}
-            className="rounded-md border px-4 py-2"
+            className="input"
           >
             {categories.map((category) => (
               <option key={category} value={category}>
@@ -103,7 +103,7 @@ export default function CreateRoomModal({
           <select
             value={quizSetId}
             onChange={(e) => setQuizSetId(e.target.value)}
-            className="rounded-md border px-4 py-2"
+            className="input"
           >
             <option value="">문제집을 선택하세요</option>
 
@@ -117,7 +117,7 @@ export default function CreateRoomModal({
           <select
             value={maxPlayers}
             onChange={(e) => setMaxPlayers(Number(e.target.value))}
-            className="rounded-md border px-4 py-2"
+            className="input"
           >
             <option value={2}>2명</option>
             <option value={3}>3명</option>
@@ -126,10 +126,7 @@ export default function CreateRoomModal({
             <option value={6}>6명</option>
           </select>
 
-          <button
-            onClick={createRoom}
-            className="rounded-md bg-black px-5 py-3 font-semibold text-white hover:bg-zinc-800"
-          >
+          <button onClick={createRoom} className="btn-primary py-3">
             방 생성
           </button>
         </div>
