@@ -59,6 +59,54 @@ export function useRoomGame({
     });
   };
 
+  const [isGeneratingAiQuestions, setIsGeneratingAiQuestions] = useState(false);
+  const [aiQuizError, setAiQuizError] = useState("");
+
+  const generateAiRoomQuizSet = async (
+    roomId: string,
+    topic: string,
+    category: string,
+    count: number,
+  ) => {
+    setIsGeneratingAiQuestions(true);
+    setAiQuizError("");
+
+    try {
+      const response = await fetch("/api/generate-quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic, category, count }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "AI 퀴즈 생성에 실패했습니다.");
+      }
+
+      const aiQuizSet: QuizSet = {
+        id: `ai-${crypto.randomUUID()}`,
+        title: `AI: ${topic}`,
+        category: category || "AI 생성",
+        author: "AI",
+        authorId: currentPlayerId,
+        questions: data.questions,
+      };
+
+      socket.emit("updateRoomQuizSet", {
+        roomId,
+        quizSet: aiQuizSet,
+        currentPlayerId,
+      });
+    } catch (error) {
+      setAiQuizError(
+        error instanceof Error ? error.message : "AI 퀴즈 생성에 실패했습니다.",
+      );
+    } finally {
+      setIsGeneratingAiQuestions(false);
+    }
+  };
+
   const createRoom = (room: Room) => {
     socket.emit("createRoom", room);
 
@@ -142,5 +190,9 @@ export function useRoomGame({
 
     restartRoomGame,
     nextQuestion,
+
+    generateAiRoomQuizSet,
+    isGeneratingAiQuestions,
+    aiQuizError,
   };
 }
