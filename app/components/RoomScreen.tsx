@@ -169,6 +169,8 @@ export default function RoomScreen({
   const isHost = room.players.some(
     (player) => player.id === currentPlayerId && player.isHost,
   );
+  const isAiQuizSet = room.quizSetId.startsWith("ai-");
+
   const currentQuestion = room.quizQuestions[room.currentQuestionIndex];
   const currentPlayer = room.players.find(
     (player) => player.id === currentPlayerId,
@@ -187,66 +189,88 @@ export default function RoomScreen({
               <h1 className="text-2xl font-bold">{room.title}</h1>
               <div className="mt-1 text-sm text-gray-500">
                 {isHost && room.status === "waiting" ? (
-                  <div className="mt-1 flex gap-2">
-                    <select
-                      value={selectedQuizSetCategory}
-                      onChange={(e) => {
-                        setSelectedQuizSetCategory(e.target.value);
-                      }}
-                      className="rounded-md border px-2 py-1 "
-                    >
-                      {quizSetCategories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
+                  <div className="mt-1 flex flex-col gap-1">
+                    <span className="text-xs">
+                      현재 문제집: {room.quizSetTitle}
+                      {isAiQuizSet && (
+                        <span className="ml-1 rounded bg-blue-100 px-1.5 py-0.5 text-xs font-semibold text-blue-700">
+                          AI
+                        </span>
+                      )}
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      <select
+                        value={selectedQuizSetCategory}
+                        onChange={(e) => {
+                          setSelectedQuizSetCategory(e.target.value);
+                        }}
+                        className="rounded-md border px-2 py-1 "
+                      >
+                        {quizSetCategories.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
 
-                    <select
-                      value={room.quizSetId}
-                      onChange={(e) => {
-                        onUpdateRoomQuizSet(room.id, e.target.value);
-                      }}
-                      className=" rounded-md border px-2 py-1 "
-                    >
-                      {visibleQuizSets.map((quizSet) => (
-                        <option key={quizSet.id} value={quizSet.id}>
-                          {quizSet.title} · {quizSet.category}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      value={aiTopic}
-                      onChange={(e) => setAiTopic(e.target.value)}
-                      placeholder="AI 주제 (예: 세계사)"
-                      className="w-32 rounded-md border px-2 py-1"
-                    />
-                    <input
-                      type="number"
-                      min={1}
-                      max={10}
-                      value={aiCount}
-                      onChange={(e) => setAiCount(Number(e.target.value))}
-                      className="w-14 rounded-md border px-2 py-1"
-                    />
-                    <button
-                      type="button"
-                      disabled={isGeneratingAiQuestions || !aiTopic.trim()}
-                      onClick={() =>
-                        onGenerateAiQuizSet(
-                          room.id,
-                          aiTopic,
-                          selectedQuizSetCategory,
-                          aiCount,
-                        )
-                      }
-                      className="whitespace-nowrap rounded-md border px-2 py-1 hover:bg-blue-100 disabled:opacity-40"
-                    >
-                      {isGeneratingAiQuestions ? "생성 중..." : "AI로 교체"}
-                    </button>
+                      <select
+                        value={room.quizSetId}
+                        onChange={(e) => {
+                          onUpdateRoomQuizSet(room.id, e.target.value);
+                        }}
+                        className=" rounded-md border px-2 py-1 "
+                      >
+                        {visibleQuizSets.map((quizSet) => (
+                          <option key={quizSet.id} value={quizSet.id}>
+                            {quizSet.title} · {quizSet.category}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        value={aiTopic}
+                        onChange={(e) => setAiTopic(e.target.value)}
+                        placeholder="AI 주제 (예: 세계사)"
+                        className="w-32 rounded-md border px-2 py-1"
+                      />
+                      <input
+                        type="number"
+                        min={1}
+                        max={10}
+                        value={aiCount}
+                        onChange={(e) => setAiCount(Number(e.target.value))}
+                        className="w-14 rounded-md border px-2 py-1"
+                      />
+                      <button
+                        type="button"
+                        disabled={isGeneratingAiQuestions || !aiTopic.trim()}
+                        onClick={() =>
+                          onGenerateAiQuizSet(
+                            room.id,
+                            aiTopic,
+                            selectedQuizSetCategory,
+                            aiCount,
+                          )
+                        }
+                        className="whitespace-nowrap rounded-md border px-2 py-1 hover:bg-blue-100 disabled:opacity-40"
+                      >
+                        {isGeneratingAiQuestions ? "생성 중..." : "AI로 교체"}
+                      </button>
+                      {aiQuizError && (
+                        <p className="w-full text-xs text-red-500">
+                          {aiQuizError}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 ) : (
-                  `문제집: ${room.quizSetTitle}`
+                  <>
+                    문제집: {room.quizSetTitle}
+                    {isAiQuizSet && (
+                      <span className="ml-1 rounded bg-blue-100 px-1.5 py-0.5 text-xs font-semibold text-blue-700">
+                        AI
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             </div>
