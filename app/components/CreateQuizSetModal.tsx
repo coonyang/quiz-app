@@ -130,10 +130,10 @@ export default function CreateQuizSetModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <section className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-lg bg-white p-6 text-black">
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">
+    <div className="modal-overlay">
+      <section className="modal-panel max-h-[90vh] overflow-y-auto">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h2 className="text-2xl font-bold text-slate-900">
             {editingQuizSet ? "문제집 수정" : "문제집 만들기"}
           </h2>
           {errorMessage && (
@@ -141,7 +141,10 @@ export default function CreateQuizSetModal({
               {errorMessage}
             </p>
           )}
-          <button className="rounded-md border px-3 py-1" onClick={onClose}>
+          <button
+            className="rounded-md px-3 py-1 text-sm text-slate-500 hover:bg-slate-100"
+            onClick={onClose}
+          >
             닫기
           </button>
         </div>
@@ -151,13 +154,13 @@ export default function CreateQuizSetModal({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="문제집 제목"
-            className="rounded-md border px-4 py-2"
+            className="input"
           ></input>
 
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="rounded-md border px-4 py-2"
+            className="input"
           >
             <option value="">카테고리를 선택하세요</option>
 
@@ -168,14 +171,14 @@ export default function CreateQuizSetModal({
             ))}
           </select>
 
-          <div className="rounded-lg border p-4">
-            <h3 className="mb-3 font-semibold">문제 추가</h3>
+          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <h3 className="mb-3 font-semibold text-slate-700">문제 추가</h3>
 
             <input
               value={questionText}
               onChange={(event) => setQuestionText(event.target.value)}
               placeholder="문제"
-              className="mb-3 w-full rounded-md border px-4 py-2"
+              className="input mb-3 w-full"
             />
 
             <div className="grid gap-2">
@@ -189,16 +192,16 @@ export default function CreateQuizSetModal({
                       setChoices(nextChoices);
                     }}
                     placeholder={`선택지 ${index + 1}`}
-                    className="flex-1 rounded-md border px-4 py-2"
+                    className="input flex-1"
                   />
 
                   <button
                     type="button"
                     onClick={() => setAnswerIndex(index)}
-                    className={`rounded-md border px-3 ${
+                    className={`rounded-lg px-3 text-sm font-medium transition-colors ${
                       answerIndex === index
-                        ? "bg-black text-white"
-                        : "bg-white text-black"
+                        ? "bg-emerald-600 text-white"
+                        : "border border-slate-300 bg-white text-slate-600 hover:bg-slate-100"
                     }`}
                   >
                     정답
@@ -207,42 +210,43 @@ export default function CreateQuizSetModal({
               ))}
             </div>
 
-            <button
-              className="mt-3 w-full rounded-md border px-4 py-2 hover:bg-emerald-300"
-              onClick={saveQuestion}
-            >
+            <button className="btn-primary mt-3 w-full" onClick={saveQuestion}>
               {editingQuestionId ? "문제 수정 완료" : "문제 추가"}
             </button>
           </div>
 
-          <p className="text-sm">추가된 문제: {questions.length}개</p>
+          <p className="text-sm text-slate-500">
+            추가된 문제: {questions.length}개
+          </p>
           {previewQuestion && (
-            <div className="rounded-md border p-3 text-left">
+            <div className="card text-left">
               <div className="mb-3 flex items-center justify-between">
-                <p className="font-semibold">
+                <p className="font-semibold text-slate-900">
                   {previewIndex + 1} / {questions.length}
                 </p>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => startEditQuestion(previewQuestion)}
-                    className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-gray-100"
+                    className="btn-outline btn-sm whitespace-nowrap"
                   >
                     수정
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteQuestion(previewQuestion.id)}
-                    className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-red-100"
+                    className="btn-danger btn-sm whitespace-nowrap"
                   >
                     삭제
                   </button>
                 </div>
               </div>
 
-              <p className="font-semibold">{previewQuestion.question}</p>
+              <p className="font-semibold text-slate-900">
+                {previewQuestion.question}
+              </p>
 
-              <ul className="mt-2 grid gap-1 text-sm">
+              <ul className="mt-2 grid gap-1 text-sm text-slate-600">
                 {previewQuestion.choices.map((choice, choiceIndex) => (
                   <li
                     key={`${choice}-${choiceIndex}`}
@@ -264,7 +268,7 @@ export default function CreateQuizSetModal({
                     setPreviewIndex((prev) => Math.max(0, prev - 1))
                   }
                   disabled={previewIndex === 0}
-                  className="rounded-md border px-3 py-1 text-sm disabled:opacity-40"
+                  className="btn-outline btn-sm"
                 >
                   이전
                 </button>
@@ -277,7 +281,7 @@ export default function CreateQuizSetModal({
                     )
                   }
                   disabled={previewIndex === questions.length - 1}
-                  className="rounded-md border px-3 py-1 text-sm disabled:opacity-40"
+                  className="btn-outline btn-sm"
                 >
                   다음
                 </button>
@@ -286,7 +290,7 @@ export default function CreateQuizSetModal({
           )}
 
           <button
-            className="rounded-md bg-black px-5 py-3 font-semibold text-white disabled:opacity-40"
+            className="btn-primary py-3"
             onClick={saveQuizSet}
             disabled={!title.trim() || !category || questions.length === 0}
           >

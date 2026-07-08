@@ -26,41 +26,42 @@ export default function RoomLobby({
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">온라인 방</h1>
+        <h1 className="text-2xl font-bold text-slate-900">온라인 방</h1>
 
-        <button
-          onClick={onOpenCreateRoomModal}
-          className="rounded-md border px-4 py-2 hover:bg-emerald-300"
-        >
-          방 만들기
+        <button onClick={onOpenCreateRoomModal} className="btn-primary btn-sm">
+          + 방 만들기
         </button>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         {currentRooms.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed text-center">
-            <p className="text-lg font-semibold mt-5">방이 없습니다</p>
+          <div className="card flex h-full flex-col items-center justify-center border-dashed py-10 text-center">
+            <p className="text-lg font-semibold text-slate-700">
+              방이 없습니다
+            </p>
 
-            <p className="mt-2 text-sm text-gray-500 p-5">
+            <p className="mt-2 text-sm text-slate-400">
               새로운 방을 만들어보세요!
             </p>
           </div>
         ) : (
           currentRooms.map((room) => (
-            <div key={room.id} className="rounded-lg border p-4">
+            <div key={room.id} className="card">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="font-semibold">{room.title}</h2>
+                  <h2 className="font-semibold text-slate-900">
+                    {room.title}
+                  </h2>
 
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-slate-500">
                     문제집: {room.quizSetTitle}
                   </p>
 
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-slate-500">
                     방장: {room.hostNickname}
                   </p>
 
-                  <p className="mt-2 text-sm font-medium">
+                  <p className="mt-2 text-sm font-medium text-slate-700">
                     인원: {room.players.length} / {room.maxPlayers}
                   </p>
                 </div>
@@ -71,7 +72,7 @@ export default function RoomLobby({
                     room.players.length >= room.maxPlayers ||
                     room.status !== "waiting"
                   }
-                  className="whitespace-nowrap rounded-md border px-3 py-1 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="btn-outline btn-sm whitespace-nowrap"
                 >
                   {room.status !== "waiting"
                     ? "게임중"
@@ -89,7 +90,7 @@ export default function RoomLobby({
         <button
           onClick={() => setCurrentPage((prev) => prev - 1)}
           disabled={currentPage === 1}
-          className="rounded border px-3 py-1 disabled:opacity-40"
+          className="btn-outline btn-sm"
         >
           이전
         </button>
@@ -98,8 +99,10 @@ export default function RoomLobby({
           <button
             key={page}
             onClick={() => setCurrentPage(page)}
-            className={`rounded border px-3 py-1 ${
-              currentPage === page ? "bg-emerald-300" : ""
+            className={`h-8 w-8 rounded-lg text-sm font-medium transition-colors ${
+              currentPage === page
+                ? "bg-emerald-600 text-white"
+                : "text-slate-500 hover:bg-slate-100"
             }`}
           >
             {page}
@@ -111,7 +114,7 @@ export default function RoomLobby({
             setCurrentPage((prev) => Math.min(prev + 1, totalPages))
           }
           disabled={!hasPages || currentPage === totalPages}
-          className="rounded border px-3 py-1 disabled:opacity-40"
+          className="btn-outline btn-sm"
         >
           다음
         </button>
