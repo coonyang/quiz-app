@@ -79,6 +79,7 @@ async function loadQuizSets() {
 
 io.on("connection", (socket) => {
   console.log("유저 연결", socket.id);
+  socket.join("lobby");
   socket.emit("roomsUpdated", rooms);
   socket.emit("quizSetsUpdated", sharedQuizSets);
 
@@ -167,13 +168,28 @@ io.on("connection", (socket) => {
 
   socket.on("registerPlayer", ({ currentPlayerId }: RegisterPlayerPayload) => {
     socketPlayerIds.set(socket.id, currentPlayerId);
+
+    // 새로고침 등으로 소켓이 새로 연결됐을 때, 이미 참여 중이던 방이 있다면
+    // 그 방 채널로 다시 join 시켜서 room 단위 이벤트를 계속 받을 수 있게 한다.
+    const existingRoom = rooms.find((room) =>
+      room.players.some((player) => player.id === currentPlayerId),
+    );
+
+    if (existingRoom) {
+      socket.leave("lobby");
+      socket.join(existingRoom.id);
+      socket.emit("roomUpdated", existingRoom);
+    }
   });
 
   socket.on("createRoom", (room: CreateRoomPayload) => {
     rooms.unshift(room);
 
-    console.log("emit 직전", rooms);
-    io.emit("roomsUpdated", rooms);
+    socket.leave("lobby");
+    socket.join(room.id);
+
+    io.to("lobby").emit("roomsUpdated", rooms);
+    io.to(room.id).emit("roomUpdated", room);
   });
 
   socket.on(
@@ -185,7 +201,15 @@ io.on("connection", (socket) => {
           : room,
       );
 
-      io.emit("roomsUpdated", rooms);
+      const updatedRoom = rooms.find((room) => room.id === roomId);
+
+      socket.leave("lobby");
+      socket.join(roomId);
+
+      io.to("lobby").emit("roomsUpdated", rooms);
+      if (updatedRoom) {
+        io.to(roomId).emit("roomUpdated", updatedRoom);
+      }
     },
   );
 
@@ -201,7 +225,10 @@ io.on("connection", (socket) => {
           : room,
       );
 
-      io.emit("roomsUpdated", rooms);
+      const updatedRoom = rooms.find((room) => room.id === roomId);
+      if (updatedRoom) {
+        io.to(roomId).emit("roomUpdated", updatedRoom);
+      }
     },
   );
 
@@ -212,7 +239,15 @@ io.on("connection", (socket) => {
       )
       .filter((room) => room.players.length > 0);
 
-    io.emit("roomsUpdated", rooms);
+    const remainingRoom = rooms.find((room) => room.id === roomId);
+
+    socket.leave(roomId);
+    socket.join("lobby");
+
+    io.to("lobby").emit("roomsUpdated", rooms);
+    if (remainingRoom) {
+      io.to(roomId).emit("roomUpdated", remainingRoom);
+    }
   });
 
   socket.on(
@@ -230,7 +265,13 @@ io.on("connection", (socket) => {
         room.id === roomId ? updateRoomQuizSet(room, quizSet) : room,
       );
 
-      io.emit("roomsUpdated", rooms);
+      const updatedRoom = rooms.find((room) => room.id === roomId);
+
+      // 로비 목록에 보이는 문제집 이름도 바뀌므로 로비에도 알려준다.
+      io.to("lobby").emit("roomsUpdated", rooms);
+      if (updatedRoom) {
+        io.to(roomId).emit("roomUpdated", updatedRoom);
+      }
     },
   );
 
@@ -249,7 +290,13 @@ io.on("connection", (socket) => {
         room.id === roomId ? updateStartRoomGame(room) : room,
       );
 
-      io.emit("roomsUpdated", rooms);
+      const updatedRoom = rooms.find((room) => room.id === roomId);
+
+      // 로비의 입장 버튼이 "게임중"으로 바뀌어야 하므로 로비에도 알려준다.
+      io.to("lobby").emit("roomsUpdated", rooms);
+      if (updatedRoom) {
+        io.to(roomId).emit("roomUpdated", updatedRoom);
+      }
     },
   );
 
@@ -262,7 +309,10 @@ io.on("connection", (socket) => {
           : room,
       );
 
-      io.emit("roomsUpdated", rooms);
+      const updatedRoom = rooms.find((room) => room.id === roomId);
+      if (updatedRoom) {
+        io.to(roomId).emit("roomUpdated", updatedRoom);
+      }
     },
   );
 
@@ -271,7 +321,10 @@ io.on("connection", (socket) => {
       room.id === roomId ? updateTimeOver(room) : room,
     );
 
-    io.emit("roomsUpdated", rooms);
+    const updatedRoom = rooms.find((room) => room.id === roomId);
+    if (updatedRoom) {
+      io.to(roomId).emit("roomUpdated", updatedRoom);
+    }
   });
 
   socket.on("countdownEnd", ({ roomId }: RoomIdPayload) => {
@@ -279,7 +332,10 @@ io.on("connection", (socket) => {
       room.id === roomId ? updateCountdownEnd(room) : room,
     );
 
-    io.emit("roomsUpdated", rooms);
+    const updatedRoom = rooms.find((room) => room.id === roomId);
+    if (updatedRoom) {
+      io.to(roomId).emit("roomUpdated", updatedRoom);
+    }
   });
 
   socket.on("nextQuestion", ({ roomId }: RoomIdPayload) => {
@@ -287,7 +343,10 @@ io.on("connection", (socket) => {
       room.id === roomId ? updateNextQuestion(room) : room,
     );
 
-    io.emit("roomsUpdated", rooms);
+    const updatedRoom = rooms.find((room) => room.id === roomId);
+    if (updatedRoom) {
+      io.to(roomId).emit("roomUpdated", updatedRoom);
+    }
   });
 
   socket.on(
@@ -304,7 +363,13 @@ io.on("connection", (socket) => {
         room.id === roomId ? updateRestartRoomGame(room) : room,
       );
 
-      io.emit("roomsUpdated", rooms);
+      const updatedRoom = rooms.find((room) => room.id === roomId);
+
+      // 로비의 입장 버튼이 다시 "입장"으로 바뀌어야 하므로 로비에도 알려준다.
+      io.to("lobby").emit("roomsUpdated", rooms);
+      if (updatedRoom) {
+        io.to(roomId).emit("roomUpdated", updatedRoom);
+      }
     },
   );
 
@@ -316,6 +381,12 @@ io.on("connection", (socket) => {
       return;
     }
 
+    const affectedRoomIds = rooms
+      .filter((room) =>
+        room.players.some((player) => player.id === currentPlayerId),
+      )
+      .map((room) => room.id);
+
     rooms = rooms
       .map((room) =>
         room.players.some((player) => player.id === currentPlayerId)
@@ -326,7 +397,14 @@ io.on("connection", (socket) => {
 
     socketPlayerIds.delete(socket.id);
 
-    io.emit("roomsUpdated", rooms);
+    io.to("lobby").emit("roomsUpdated", rooms);
+
+    affectedRoomIds.forEach((roomId) => {
+      const updatedRoom = rooms.find((room) => room.id === roomId);
+      if (updatedRoom) {
+        io.to(roomId).emit("roomUpdated", updatedRoom);
+      }
+    });
 
     console.log("연결 종료", socket.id);
   });
