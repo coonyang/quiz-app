@@ -225,7 +225,10 @@ io.on("connection", (socket) => {
           : room,
       );
 
-      io.emit("roomsUpdated", rooms);
+      const updatedRoom = rooms.find((room) => room.id === roomId);
+      if (updatedRoom) {
+        io.to(roomId).emit("roomUpdated", updatedRoom);
+      }
     },
   );
 
@@ -306,7 +309,10 @@ io.on("connection", (socket) => {
           : room,
       );
 
-      io.emit("roomsUpdated", rooms);
+      const updatedRoom = rooms.find((room) => room.id === roomId);
+      if (updatedRoom) {
+        io.to(roomId).emit("roomUpdated", updatedRoom);
+      }
     },
   );
 
@@ -315,7 +321,10 @@ io.on("connection", (socket) => {
       room.id === roomId ? updateTimeOver(room) : room,
     );
 
-    io.emit("roomsUpdated", rooms);
+    const updatedRoom = rooms.find((room) => room.id === roomId);
+    if (updatedRoom) {
+      io.to(roomId).emit("roomUpdated", updatedRoom);
+    }
   });
 
   socket.on("countdownEnd", ({ roomId }: RoomIdPayload) => {
@@ -323,7 +332,10 @@ io.on("connection", (socket) => {
       room.id === roomId ? updateCountdownEnd(room) : room,
     );
 
-    io.emit("roomsUpdated", rooms);
+    const updatedRoom = rooms.find((room) => room.id === roomId);
+    if (updatedRoom) {
+      io.to(roomId).emit("roomUpdated", updatedRoom);
+    }
   });
 
   socket.on("nextQuestion", ({ roomId }: RoomIdPayload) => {
@@ -331,7 +343,10 @@ io.on("connection", (socket) => {
       room.id === roomId ? updateNextQuestion(room) : room,
     );
 
-    io.emit("roomsUpdated", rooms);
+    const updatedRoom = rooms.find((room) => room.id === roomId);
+    if (updatedRoom) {
+      io.to(roomId).emit("roomUpdated", updatedRoom);
+    }
   });
 
   socket.on(
