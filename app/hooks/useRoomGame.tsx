@@ -19,26 +19,25 @@ export function useRoomGame({
 }: UseRoomGameProps) {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [enteredRoomId, setEnteredRoomId] = useState<string | null>(null);
+  const [enteredRoom, setEnteredRoom] = useState<Room | null>(null);
 
   useEffect(() => {
-    socket.on("roomsUpdated", (rooms) => {
+    // 로비(방 목록)를 보고 있을 때 필요한 목록 전체 갱신
+    socket.on("roomsUpdated", (rooms: Room[]) => {
       setRooms(rooms);
+    });
 
-      const joinedRoom = rooms.find((room: Room) =>
-        room.players.some((player) => player.id === currentPlayerId),
-      );
-
-      if (joinedRoom) {
-        setEnteredRoomId(joinedRoom.id);
-      } else {
-        setEnteredRoomId(null);
-      }
+    // 내가 들어가 있는 방 하나의 상태 갱신 (서버가 해당 방 채널로만 보내줌)
+    socket.on("roomUpdated", (room: Room) => {
+      setEnteredRoom(room);
+      setEnteredRoomId(room.id);
     });
 
     return () => {
       socket.off("roomsUpdated");
+      socket.off("roomUpdated");
     };
-  }, [currentPlayerId]);
+  }, []);
 
   useEffect(() => {
     if (!currentPlayerId) return;
@@ -128,9 +127,10 @@ export function useRoomGame({
       roomId: enteredRoomId,
       currentPlayerId,
     });
-  };
 
-  const enteredRoom = rooms.find((room) => room.id === enteredRoomId);
+    setEnteredRoomId(null);
+    setEnteredRoom(null);
+  };
 
   const sendRoomMessage = (roomId: string, message: ChatMessage) => {
     socket.emit("sendRoomMessage", { roomId, message });
