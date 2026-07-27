@@ -132,6 +132,12 @@ export default function HomeClient() {
     currentPlayerId,
   });
 
+  useEffect(() => {
+    if (enteredRoomId) {
+      setPlayMode("online");
+    }
+  }, [enteredRoomId]);
+
   /* 문제집 관리 함수 */
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
