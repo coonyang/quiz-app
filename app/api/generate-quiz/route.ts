@@ -72,6 +72,7 @@ export async function POST(request: Request) {
             properties: {
               questions: {
                 type: "array",
+                minItems: 1,
                 items: {
                   type: "object",
                   properties: {
@@ -102,6 +103,10 @@ export async function POST(request: Request) {
     }
 
     const parsed = JSON.parse(raw) as { questions: GeneratedQuestion[] };
+
+    if (!Array.isArray(parsed.questions) || parsed.questions.length === 0) {
+      throw new Error("AI가 문제를 생성하지 못했습니다.");
+    }
 
     const questions: Question[] = parsed.questions.map((q, index) => ({
       id: Date.now() + index,
