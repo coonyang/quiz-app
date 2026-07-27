@@ -6,10 +6,31 @@ const MIN_COUNT = 1;
 const MAX_COUNT = 10;
 const DEFAULT_COUNT = 5;
 
+const RATE_LIMIT_MAX_REQUESTS = 5;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const requestTimestampsByPlayer = new Map<string, number[]>();
+
+function isRateLimited(playerId: string): boolean {
+  const now = Date.now();
+  const recentTimestamps = (
+    requestTimestampsByPlayer.get(playerId) ?? []
+  ).filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
+
+  if (recentTimestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
+    requestTimestampsByPlayer.set(playerId, recentTimestamps);
+    return true;
+  }
+
+  recentTimestamps.push(now);
+  requestTimestampsByPlayer.set(playerId, recentTimestamps);
+  return false;
+}
+
 type GenerateQuizRequestBody = {
   topic?: string;
   category?: string;
   count?: number;
+  currentPlayerId?: string;
 };
 
 type GeneratedQuestion = {
@@ -19,13 +40,37 @@ type GeneratedQuestion = {
 };
 
 export async function POST(request: Request) {
-  const { topic, category, count }: GenerateQuizRequestBody =
-    await request.json();
+  let body: GenerateQuizRequestBody;
+
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "잘못된 요청입니다." },
+      { status: 400 },
+    );
+  }
+
+  const { topic, category, count, currentPlayerId } = body;
 
   if (!topic || !topic.trim()) {
     return NextResponse.json(
       { error: "주제를 입력해주세요." },
       { status: 400 },
+    );
+  }
+
+  if (!currentPlayerId) {
+    return NextResponse.json(
+      { error: "잘못된 요청입니다." },
+      { status: 400 },
+    );
+  }
+
+  if (isRateLimited(currentPlayerId)) {
+    return NextResponse.json(
+      { error: "너무 많이 요청했어요. 잠시 후 다시 시도해주세요." },
+      { status: 429 },
     );
   }
 
@@ -72,6 +117,7 @@ export async function POST(request: Request) {
             properties: {
               questions: {
                 type: "array",
+                minItems: 1,
                 items: {
                   type: "object",
                   properties: {
@@ -102,6 +148,10 @@ export async function POST(request: Request) {
     }
 
     const parsed = JSON.parse(raw) as { questions: GeneratedQuestion[] };
+
+    if (!Array.isArray(parsed.questions) || parsed.questions.length === 0) {
+      throw new Error("AI가 문제를 생성하지 못했습니다.");
+    }
 
     const questions: Question[] = parsed.questions.map((q, index) => ({
       id: Date.now() + index,
