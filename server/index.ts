@@ -45,6 +45,9 @@ const io = new Server(server, {
 
 const socketPlayerIds = new Map<string, string>();
 
+const RECONNECT_GRACE_MS = 5000;
+const pendingDisconnects = new Map<string, NodeJS.Timeout>();
+
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -169,8 +172,12 @@ io.on("connection", (socket) => {
   socket.on("registerPlayer", ({ currentPlayerId }: RegisterPlayerPayload) => {
     socketPlayerIds.set(socket.id, currentPlayerId);
 
-    // 새로고침 등으로 소켓이 새로 연결됐을 때, 이미 참여 중이던 방이 있다면
-    // 그 방 채널로 다시 join 시켜서 room 단위 이벤트를 계속 받을 수 있게 한다.
+    const pendingRemoval = pendingDisconnects.get(currentPlayerId);
+    if (pendingRemoval) {
+      clearTimeout(pendingRemoval);
+      pendingDisconnects.delete(currentPlayerId);
+    }
+
     const existingRoom = rooms.find((room) =>
       room.players.some((player) => player.id === currentPlayerId),
     );
@@ -376,35 +383,41 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const currentPlayerId = socketPlayerIds.get(socket.id);
 
+    socketPlayerIds.delete(socket.id);
+
     if (!currentPlayerId) {
       console.log("연결 종료", socket.id);
       return;
     }
 
-    const affectedRoomIds = rooms
-      .filter((room) =>
-        room.players.some((player) => player.id === currentPlayerId),
-      )
-      .map((room) => room.id);
+    const timeout = setTimeout(() => {
+      pendingDisconnects.delete(currentPlayerId);
 
-    rooms = rooms
-      .map((room) =>
-        room.players.some((player) => player.id === currentPlayerId)
-          ? updateLeaveRoom(room, currentPlayerId)
-          : room,
-      )
-      .filter((room) => room.players.length > 0);
+      const affectedRoomIds = rooms
+        .filter((room) =>
+          room.players.some((player) => player.id === currentPlayerId),
+        )
+        .map((room) => room.id);
 
-    socketPlayerIds.delete(socket.id);
+      rooms = rooms
+        .map((room) =>
+          room.players.some((player) => player.id === currentPlayerId)
+            ? updateLeaveRoom(room, currentPlayerId)
+            : room,
+        )
+        .filter((room) => room.players.length > 0);
 
-    io.to("lobby").emit("roomsUpdated", rooms);
+      io.to("lobby").emit("roomsUpdated", rooms);
 
-    affectedRoomIds.forEach((roomId) => {
-      const updatedRoom = rooms.find((room) => room.id === roomId);
-      if (updatedRoom) {
-        io.to(roomId).emit("roomUpdated", updatedRoom);
-      }
-    });
+      affectedRoomIds.forEach((roomId) => {
+        const updatedRoom = rooms.find((room) => room.id === roomId);
+        if (updatedRoom) {
+          io.to(roomId).emit("roomUpdated", updatedRoom);
+        }
+      });
+    }, RECONNECT_GRACE_MS);
+
+    pendingDisconnects.set(currentPlayerId, timeout);
 
     console.log("연결 종료", socket.id);
   });
