@@ -220,6 +220,11 @@ export default function RoomScreen({
                         }}
                         className="input py-1.5"
                       >
+                        {isAiQuizSet && (
+                          <option value={room.quizSetId}>
+                            {room.quizSetTitle} (AI)
+                          </option>
+                        )}
                         {visibleQuizSets.map((quizSet) => (
                           <option key={quizSet.id} value={quizSet.id}>
                             {quizSet.title} · {quizSet.category}
