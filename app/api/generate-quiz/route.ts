@@ -19,8 +19,18 @@ type GeneratedQuestion = {
 };
 
 export async function POST(request: Request) {
-  const { topic, category, count }: GenerateQuizRequestBody =
-    await request.json();
+  let body: GenerateQuizRequestBody;
+
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "잘못된 요청입니다." },
+      { status: 400 },
+    );
+  }
+
+  const { topic, category, count } = body;
 
   if (!topic || !topic.trim()) {
     return NextResponse.json(
