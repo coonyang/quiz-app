@@ -74,7 +74,7 @@ export function useRoomGame({
       const response = await fetch("/api/generate-quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, category, count }),
+        body: JSON.stringify({ topic, category, count, currentPlayerId }),
       });
 
       const data = await response.json();
